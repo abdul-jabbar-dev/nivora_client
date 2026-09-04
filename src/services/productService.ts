@@ -1,0 +1,49 @@
+import { Product, Category } from "../types/product";
+
+const API_URL = 'http://localhost:3005';
+
+export async function getTrendingProducts(): Promise<Product[]> {
+  const response = await fetch(`${API_URL}/products/trending`);
+  if (!response.ok) throw new Error('Failed to fetch trending products');
+  return response.json();
+}
+
+export async function getCategories(): Promise<Category[]> {
+  const response = await fetch(`${API_URL}/products/categories`);
+  if (!response.ok) throw new Error('Failed to fetch categories');
+  return response.json();
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | null> {
+  const response = await fetch(`${API_URL}/products/${slug}`);
+  if (!response.ok) {
+    if (response.status === 404) return null;
+    throw new Error('Failed to fetch product');
+  }
+  return response.json();
+}
+
+export async function getRelatedProducts(categoryId: string, limit = 4): Promise<Product[]> {
+  const response = await fetch(`${API_URL}/products/related/${categoryId}?limit=${limit}`);
+  if (!response.ok) throw new Error('Failed to fetch related products');
+  return response.json();
+}
+
+export interface GetProductsParams {
+  category?: string;
+  sort?: string;
+  page?: number;
+  limit?: number;
+}
+
+export async function getProducts(params: GetProductsParams): Promise<{ products: Product[], total: number, totalPages: number }> {
+  const searchParams = new URLSearchParams();
+  if (params.category) searchParams.append('category', params.category);
+  if (params.sort) searchParams.append('sort', params.sort);
+  if (params.page) searchParams.append('page', params.page.toString());
+  if (params.limit) searchParams.append('limit', params.limit.toString());
+
+  const response = await fetch(`${API_URL}/products?${searchParams.toString()}`);
+  if (!response.ok) throw new Error('Failed to fetch products');
+  return response.json();
+}
