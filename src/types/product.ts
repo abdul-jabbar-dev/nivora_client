@@ -13,7 +13,7 @@ export interface Product {
   slug: string;
   images: string[];
   variants?: ProductVariant[];
-  inventory: number;
+  stock: number;
   features?: string[];
   specifications?: Record<string, string>;
   brand?: string;
@@ -23,13 +23,14 @@ export interface Product {
   };
 }
 
-export interface ProductVariant {
-  id: string;
+export interface ProductVariantOption {
   name: string;
-  type: 'color' | 'size' | 'storage';
-  value: string;
-  priceOffset?: number;
-  inventory: number;
+  image?: string | null;
+}
+
+export interface ProductVariant {
+  type: string;
+  options: ProductVariantOption[];
 }
 
 export interface Review {

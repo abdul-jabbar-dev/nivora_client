@@ -3,25 +3,29 @@
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/store/useAuthStore'
+import { Suspense } from 'react'
 
-export default function LoginPage() {
+function LoginContent() {
   const supabase = createClient()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { user, isLoading } = useAuthStore()
 
   useEffect(() => {
     if (!isLoading && user) {
-      router.push('/profile')
+      const redirectUrl = searchParams.get('redirect') || '/profile'
+      router.push(redirectUrl)
     }
-  }, [user, isLoading, router])
+  }, [user, isLoading, router, searchParams])
 
   const handleOAuthLogin = async (provider: 'google' | 'facebook') => {
+    const redirectUrl = searchParams.get('redirect') || '/profile'
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectUrl)}`,
       },
     })
 
@@ -68,5 +72,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center">Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   )
 }

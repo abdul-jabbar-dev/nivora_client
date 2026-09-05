@@ -7,16 +7,27 @@ import { cn } from "@/lib/utils";
 interface ProductDetailsProps {
   description: string;
   features?: string[];
-  specifications?: Record<string, string>;
+  specifications?: any; // Array<{key, value}> or Record<string, string>
 }
 
 export function ProductDetails({ description, features, specifications }: ProductDetailsProps) {
+  // Normalize specifications
+  let normalizedSpecs: {key: string, value: string}[] = [];
+  if (specifications) {
+    if (Array.isArray(specifications)) {
+      normalizedSpecs = specifications;
+    } else if (typeof specifications === 'object') {
+      normalizedSpecs = Object.entries(specifications).map(([k, v]) => ({ key: k, value: String(v) }));
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6 w-full max-w-4xl pt-8">
       <Section title="Product Details" defaultOpen>
-        <p className="text-muted-foreground leading-relaxed">
-          {description}
-        </p>
+        <div 
+          className="text-muted-foreground leading-relaxed prose prose-sm max-w-none dark:prose-invert"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
       </Section>
 
       {features && features.length > 0 && (
@@ -34,18 +45,18 @@ export function ProductDetails({ description, features, specifications }: Produc
         </Section>
       )}
 
-      {specifications && Object.keys(specifications).length > 0 && (
+      {normalizedSpecs.length > 0 && (
         <Section title="Specifications">
           <div className="rounded-xl border border-border overflow-hidden">
             <table className="w-full text-sm text-left">
               <tbody className="divide-y divide-border">
-                {Object.entries(specifications).map(([key, value]) => (
-                  <tr key={key} className="even:bg-muted/50 flex flex-col sm:table-row">
+                {normalizedSpecs.map((spec, idx) => (
+                  <tr key={idx} className="even:bg-muted/50 flex flex-col sm:table-row">
                     <td className="px-6 py-4 font-medium text-foreground sm:w-1/3 border-b sm:border-b-0 border-border sm:border-r">
-                      {key}
+                      {spec.key}
                     </td>
                     <td className="px-6 py-4 text-muted-foreground">
-                      {value}
+                      {spec.value}
                     </td>
                   </tr>
                 ))}

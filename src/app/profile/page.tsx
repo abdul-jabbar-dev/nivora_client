@@ -9,6 +9,14 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/useAuthStore";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { Skeleton } from "@/components/ui/Skeleton";
+
+// Helper for authenticated fetches (same as checkout)
+const api = {
+  get: async (url: string) => fetch(`http://localhost:3005${url}`, { headers: { Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` } }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); }),
+  patch: async (url: string, data: any) => fetch(`http://localhost:3005${url}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` }, body: JSON.stringify(data) }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); })
+};
 
 const TABS = [
   { id: "personal", label: "Personal Info", icon: User },
@@ -19,8 +27,56 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState("personal");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [addressModalMode, setAddressModalMode] = useState<"add" | "edit">("add");
-  const { user } = useAuthStore();
+  const { user, session } = useAuthStore();
   const router = useRouter();
+
+  const [addressData, setAddressData] = useState({
+    firstName: '',
+    lastName: '',
+    address: '',
+    city: '',
+    zip: '',
+    landmark: '',
+    phoneNumber: ''
+  });
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!session) return;
+      try {
+        const response = await api.get('/users/profile');
+        const profile = response.data;
+        if (profile) {
+          setAddressData(prev => ({
+            ...prev,
+            firstName: profile.firstName || '',
+            lastName: profile.lastName || '',
+            address: profile.address || '',
+            city: profile.city || '',
+            zip: profile.zip || '',
+            landmark: profile.landmark || '',
+            phoneNumber: profile.phoneNumber || ''
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile', err);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+    fetchProfile();
+  }, [session]);
+
+  const handleSaveAddress = async () => {
+    try {
+      await api.patch('/users/profile', addressData);
+      setIsAddressModalOpen(false);
+    } catch (err) {
+      console.error('Failed to save address', err);
+      alert('Failed to save address.');
+    }
+  };
 
   const handleLogout = async () => {
     const supabase = createClient();
@@ -127,17 +183,31 @@ export default function ProfilePage() {
                     <span className="absolute -top-3 left-4 bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">Default</span>
                     <div className="flex items-start gap-3 mt-2">
                       <MapPin className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                      <div>
+                      <div className="w-full">
                         <h4 className="font-semibold mb-1">Home</h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                          123 Main Street, Apt 4B<br />
-                          Gulshan, Dhaka 1212<br />
-                          Bangladesh
-                        </p>
+                        {isLoadingProfile ? (
+                          <div className="space-y-2 max-w-[200px]">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-4 w-5/6" />
+                          </div>
+                        ) : addressData.address ? (
+                          <p className="text-sm text-muted-foreground leading-relaxed">
+                            {addressData.firstName} {addressData.lastName}<br />
+                            {addressData.address}<br />
+                            {addressData.landmark && <>{addressData.landmark}<br /></>}
+                            {addressData.city}{addressData.zip ? `, ${addressData.zip}` : ''}<br />
+                            {addressData.phoneNumber}
+                          </p>
+                        ) : (
+                          <p className="text-sm text-muted-foreground leading-relaxed">No default address set.</p>
+                        )}
                       </div>
                     </div>
                     <div className="mt-4 flex gap-2">
-                      <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => { setAddressModalMode("edit"); setIsAddressModalOpen(true); }}>Edit</Button>
+                      <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => { setAddressModalMode("edit"); setIsAddressModalOpen(true); }}>
+                        {addressData.address ? 'Edit' : 'Add'}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -206,29 +276,39 @@ export default function ProfilePage() {
                 <label className="text-sm font-medium">Address Title</label>
                 <input type="text" placeholder="e.g. Home, Office" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Receiver Contact Number</label>
-                <input type="tel" placeholder="e.g. +880 1..." className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">First Name</label>
+                  <input value={addressData.firstName} onChange={e => setAddressData({...addressData, firstName: e.target.value})} type="text" placeholder="e.g. John" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Last Name</label>
+                  <input value={addressData.lastName} onChange={e => setAddressData({...addressData, lastName: e.target.value})} type="text" placeholder="e.g. Doe" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                </div>
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">House / Street</label>
-                <input type="text" placeholder="e.g. House 12, Road 5" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                <label className="text-sm font-medium">Receiver Contact Number</label>
+                <input value={addressData.phoneNumber} onChange={e => setAddressData({...addressData, phoneNumber: e.target.value})} type="tel" placeholder="e.g. 01XXXXXXXXX" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">House / Street Address</label>
+                <input value={addressData.address} onChange={e => setAddressData({...addressData, address: e.target.value})} type="text" placeholder="e.g. House 12, Road 5" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Area</label>
-                  <input type="text" placeholder="e.g. Gulshan, Dhanmondi" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                  <label className="text-sm font-medium">Postal Code</label>
+                  <input value={addressData.zip} onChange={e => setAddressData({...addressData, zip: e.target.value})} type="text" placeholder="e.g. 1212" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">City</label>
-                  <input type="text" placeholder="e.g. Dhaka" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                  <input value={addressData.city} onChange={e => setAddressData({...addressData, city: e.target.value})} type="text" placeholder="e.g. Dhaka" className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                 </div>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium">Specific Location / Landmark (Optional)</label>
-                <textarea placeholder="e.g. Next to the super shop..." className="flex min-h-[60px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                <textarea value={addressData.landmark} onChange={e => setAddressData({...addressData, landmark: e.target.value})} placeholder="e.g. Next to the super shop..." className="flex min-h-[60px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
               </div>
-              <Button className="w-full mt-2" onClick={() => setIsAddressModalOpen(false)}>Save Address</Button>
+              <Button className="w-full mt-2" onClick={handleSaveAddress}>Save Address</Button>
             </div>
           </div>
         </div>

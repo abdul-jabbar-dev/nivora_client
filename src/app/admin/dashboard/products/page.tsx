@@ -1,256 +1,199 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createProduct } from "../actions";
+import Link from "next/link";
+import { deleteProduct } from "../actions";
 import { Button } from "@/components/ui/Button";
+import { Plus, Edit, Trash2, Search, Package } from "lucide-react";
+import Image from "next/image";
 
-interface Category {
+interface Product {
   id: string;
   name: string;
+  slug: string;
+  price: number;
+  stock: number;
+  imageUrl: string;
+  category?: { name: string };
+  isTrending: boolean;
+  status: string;
+  visibleStatus: string;
 }
 
-export default function ProductsAdminPage() {
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
+export default function ProductsListPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
   
-  // Variations state: array of { type: string, options: string }
-  const [variations, setVariations] = useState<{ type: string; options: string }[]>([]);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Images state
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
-  const [mainImageIndex, setMainImageIndex] = useState<number>(0);
-
-  useEffect(() => {
-    // Fetch categories from the public endpoint for the dropdown
-    fetch("http://localhost:3005/products/categories")
-      .then(res => res.json())
-      .then(data => setCategories(data))
-      .catch(err => console.error("Failed to fetch categories", err));
-  }, []);
-
-  const handleAddVariation = () => {
-    setVariations([...variations, { type: "", options: "" }]);
-  };
-
-  const updateVariation = (index: number, field: "type" | "options", value: string) => {
-    const newVars = [...variations];
-    newVars[index][field] = value;
-    setVariations(newVars);
-  };
-
-  const removeVariation = (index: number) => {
-    setVariations(variations.filter((_, i) => i !== index));
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const filesArray = Array.from(e.target.files);
-      setSelectedFiles(filesArray);
-      
-      const newPreviews = filesArray.map(file => URL.createObjectURL(file));
-      setPreviews(newPreviews);
-      setMainImageIndex(0); // Reset to first image
-    }
-  };
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setSuccess(false);
-    setError(null);
-
+  const fetchProducts = async () => {
     try {
-      if (selectedFiles.length === 0) {
-        throw new Error("Please select at least one image");
-      }
-
-      // 1. Upload files
-      const uploadFormData = new FormData();
-      selectedFiles.forEach(file => uploadFormData.append('files', file));
-      
-      const uploadRes = await fetch("http://localhost:3005/upload", {
-        method: "POST",
-        body: uploadFormData,
-      });
-      
-      if (!uploadRes.ok) {
-        throw new Error("Failed to upload images");
-      }
-      
-      const uploadData = await uploadRes.json();
-      const imageUrls = uploadData.urls;
-      const mainImageUrl = imageUrls[mainImageIndex] || imageUrls[0];
-
-      // 2. Submit Product
-      const formData = new FormData(e.currentTarget);
-      const name = formData.get("name") as string;
-      const slug = formData.get("slug") as string;
-      const description = formData.get("description") as string;
-      const price = parseFloat(formData.get("price") as string);
-      const categoryId = formData.get("categoryId") as string;
-      const stock = parseInt(formData.get("stock") as string, 10);
-
-      // Format variations JSON
-      const formattedVariations = variations.map(v => ({
-        type: v.type,
-        options: v.options.split(",").map(s => s.trim()).filter(Boolean)
-      })).filter(v => v.type && v.options.length > 0);
-
-      const data = {
-        name,
-        slug,
-        description,
-        price,
-        imageUrl: mainImageUrl,
-        images: imageUrls,
-        categoryId,
-        stock,
-        variants: formattedVariations.length > 0 ? formattedVariations : null
-      };
-
-      await createProduct(data);
-      setSuccess(true);
-      (e.target as HTMLFormElement).reset();
-      setVariations([]);
-      setSelectedFiles([]);
-      setPreviews([]);
+      setLoading(true);
+      const res = await fetch("http://localhost:3005/products?limit=100"); // higher limit for admin
+      if (!res.ok) throw new Error("Failed to fetch products");
+      const data = await res.json();
+      setProducts(data.products || []);
     } catch (err: any) {
       setError(err.message);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  const renderCategoryOptions = (parentId: string | null, level = 0): React.ReactNode[] => {
-    const children = categories.filter(c => (c as any).parentId === parentId);
-    return children.flatMap(child => [
-      <option key={child.id} value={child.id}>
-        {"\u00A0\u00A0\u00A0\u00A0".repeat(level)}{level > 0 ? "└ " : ""}{child.name}
-      </option>,
-      ...renderCategoryOptions(child.id, level + 1)
-    ]);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this product?")) return;
+    
+    setDeletingId(id);
+    try {
+      await deleteProduct(id);
+      setProducts(products.filter(p => p.id !== id));
+    } catch (err: any) {
+      alert(err.message || "Failed to delete product");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Manage Products</h1>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Products</h1>
+          <p className="text-muted-foreground text-sm mt-1">Manage your store's inventory</p>
+        </div>
+        <Link href="/admin/dashboard/products/create">
+          <Button className="flex items-center gap-2">
+            <Plus className="w-4 h-4" /> Add New Product
+          </Button>
+        </Link>
       </div>
 
-      <div className="bg-background rounded-2xl p-6 shadow-sm border border-border">
-        <h2 className="text-lg font-bold mb-4">Create New Product</h2>
-        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Product Name</label>
-              <input name="name" required type="text" className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Slug (URL friendly)</label>
-              <input name="slug" required type="text" className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Price (৳)</label>
-              <input name="price" required type="number" step="0.01" className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Stock Quantity</label>
-              <input name="stock" required type="number" defaultValue="10" className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Category</label>
-              <select name="categoryId" required className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
-                <option value="">Select a category</option>
-                {renderCategoryOptions(null)}
-              </select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Product Images</label>
+      <div className="bg-background rounded-2xl shadow-sm border border-border overflow-hidden">
+        <div className="p-4 border-b border-border flex items-center gap-4">
+          <div className="relative flex-1 max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input 
-              type="file" 
-              accept="image/*" 
-              multiple 
-              required
-              onChange={handleFileChange}
-              className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium hover:file:cursor-pointer" 
+              type="text" 
+              placeholder="Search products..." 
+              className="w-full pl-9 pr-4 py-2 bg-muted/50 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
             />
-            
-            {previews.length > 0 && (
-              <div className="mt-4">
-                <p className="text-xs text-muted-foreground mb-2">Select the main thumbnail image:</p>
-                <div className="flex flex-wrap gap-4">
-                  {previews.map((src, idx) => (
-                    <div 
-                      key={idx} 
-                      onClick={() => setMainImageIndex(idx)}
-                      className={`relative cursor-pointer rounded-lg overflow-hidden border-2 transition-all ${mainImageIndex === idx ? 'border-primary ring-2 ring-primary ring-offset-2' : 'border-transparent'}`}
-                    >
-                      <img src={src} alt={`preview-${idx}`} className="w-24 h-24 object-cover" />
-                      {mainImageIndex === idx && (
-                        <div className="absolute top-1 right-1 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded">
-                          MAIN
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+          </div>
+        </div>
+        
+        <div className="overflow-x-auto">
+          {loading ? (
+            <div className="p-8 text-center text-muted-foreground">Loading products...</div>
+          ) : error ? (
+            <div className="p-8 text-center text-red-500">{error}</div>
+          ) : products.length === 0 ? (
+            <div className="p-12 flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                <Package className="w-8 h-8 text-muted-foreground" />
               </div>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
-            <textarea name="description" className="flex min-h-[100px] w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
-          </div>
-
-          <div className="space-y-4 border-t border-border pt-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold">Variations (Optional)</h3>
-              <Button type="button" variant="outline" size="sm" onClick={handleAddVariation}>
-                + Add Variation
-              </Button>
+              <h3 className="text-lg font-bold mb-1">No products found</h3>
+              <p className="text-muted-foreground mb-4">Get started by adding your first product.</p>
+              <Link href="/admin/dashboard/products/create">
+                <Button>Add New Product</Button>
+              </Link>
             </div>
-            
-            {variations.map((variation, index) => (
-              <div key={index} className="flex gap-4 items-end p-4 border border-border rounded-lg bg-muted/10">
-                <div className="space-y-2 flex-1">
-                  <label className="text-xs font-medium">Type (e.g. Size, Color)</label>
-                  <input 
-                    type="text" 
-                    value={variation.type}
-                    onChange={(e) => updateVariation(index, "type", e.target.value)}
-                    className="flex h-9 w-full rounded-md border border-border bg-background px-3 py-1 text-sm" 
-                  />
-                </div>
-                <div className="space-y-2 flex-2 w-full">
-                  <label className="text-xs font-medium">Options (comma separated, e.g. S, M, L)</label>
-                  <input 
-                    type="text" 
-                    value={variation.options}
-                    onChange={(e) => updateVariation(index, "options", e.target.value)}
-                    className="flex h-9 w-full rounded-md border border-border bg-background px-3 py-1 text-sm" 
-                  />
-                </div>
-                <Button type="button" variant="outline" onClick={() => removeVariation(index)} className="text-red-500 hover:text-red-700 hover:bg-red-50 h-9">
-                  Remove
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          {error && <p className="text-sm font-medium text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>}
-          {success && <p className="text-sm font-medium text-green-600 bg-green-50 p-3 rounded-lg">Product created successfully!</p>}
-
-          <Button type="submit" disabled={loading} className="w-full">
-            {loading ? "Creating..." : "Create Product"}
-          </Button>
-        </form>
+          ) : (
+            <table className="w-full text-sm text-left">
+              <thead className="text-xs text-muted-foreground uppercase bg-muted/30 border-b border-border">
+                <tr>
+                  <th className="px-6 py-4 font-medium">Product</th>
+                  <th className="px-6 py-4 font-medium">Category</th>
+                  <th className="px-6 py-4 font-medium">Price</th>
+                  <th className="px-6 py-4 font-medium">Stock</th>
+                  <th className="px-6 py-4 font-medium">Inventory</th>
+                  <th className="px-6 py-4 font-medium">Status & Visibility</th>
+                  <th className="px-6 py-4 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {products.map((product) => (
+                  <tr key={product.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="relative w-12 h-12 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                          {product.imageUrl ? (
+                            <Image src={product.imageUrl} alt={product.name} fill className="object-cover" sizes="48px" />
+                          ) : (
+                            <Package className="w-6 h-6 m-auto mt-3 text-muted-foreground" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="font-medium text-foreground">{product.name}</div>
+                          <div className="text-xs text-muted-foreground">{product.slug}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                        {product.category?.name || "Uncategorized"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 font-medium">
+                      ৳{product.price.toFixed(2)}
+                    </td>
+                    <td className="px-6 py-4">
+                      {product.stock}
+                    </td>
+                    <td className="px-6 py-4">
+                      {product.stock > 0 ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-100 text-green-700">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500" /> In Stock
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-100 text-red-700">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500" /> Out of Stock
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-1.5">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase w-max ${
+                          product.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                          product.status === 'restricted' ? 'bg-amber-100 text-amber-700' :
+                          'bg-rose-100 text-rose-700'
+                        }`}>
+                          {product.status || 'Active'}
+                        </span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase w-max ${
+                          product.visibleStatus === 'not show' ? 'bg-slate-200 text-slate-600' : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          {product.visibleStatus || 'Show'}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2">
+                        <Link href={`/admin/dashboard/products/${product.id}/edit`}>
+                          <Button variant="outline" size="sm" className="h-8 px-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-transparent hover:border-blue-200">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </Link>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => handleDelete(product.id)}
+                          disabled={deletingId === product.id}
+                          className="h-8 px-2 text-red-600 hover:text-red-700 hover:bg-red-50 border-transparent hover:border-red-200"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
     </div>
   );

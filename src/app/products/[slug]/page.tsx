@@ -3,13 +3,9 @@ import { notFound } from "next/navigation";
 import { getProductBySlug, getRelatedProducts } from "@/services/productService";
 import { Container } from "@/components/ui/Container";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { ProductGallery } from "@/components/products/pdp/ProductGallery";
-import { ProductInfo } from "@/components/products/pdp/ProductInfo";
-import { VariantSelector } from "@/components/products/pdp/VariantSelector";
-import { PurchaseActions } from "@/components/products/pdp/PurchaseActions";
-import { TrustFeatures } from "@/components/products/pdp/TrustFeatures";
-import { ProductDetails } from "@/components/products/pdp/ProductDetails";
+import { ProductInteractiveArea } from "@/components/products/pdp/ProductInteractiveArea";
 import { CustomerReviews } from "@/components/products/pdp/CustomerReviews";
+import { getProductReviews } from "@/services/reviewService";
 import { MobilePurchaseBar } from "@/components/products/pdp/MobilePurchaseBar";
 import { ProductCard } from "@/components/products/ProductCard";
 
@@ -56,32 +52,23 @@ export default async function ProductPage({ params }: PageProps) {
     notFound();
   }
 
-  const relatedProducts = await getRelatedProducts(product.category, 4);
+  const categoryId = typeof product.category === 'object' ? (product.category as any)?.id : (product as any).categoryId || product.category;
+  const relatedProducts = await getRelatedProducts(categoryId, 4);
+
+  const categoryName = typeof product.category === 'object' ? (product.category as any)?.name || 'Category' : product.category || 'Category';
 
   const breadcrumbItems = [
-    { label: product.category, href: `/categories/${product.category.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}` },
+    { label: categoryName, href: `/categories/${String(categoryName).toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}` },
     { label: product.name },
   ];
 
-  // Mock Reviews
-  const mockReviews = [
-    {
-      id: "r1",
-      authorName: "Sarah M.",
-      rating: 5,
-      content: "Absolutely love this! The quality is exceptional and it exceeded my expectations. Fast shipping too.",
-      date: "2 days ago",
-      verifiedPurchase: true,
-    },
-    {
-      id: "r2",
-      authorName: "James T.",
-      rating: 4,
-      content: "Great product overall. Exactly as described. I knocked off one star because the packaging could be slightly better.",
-      date: "1 week ago",
-      verifiedPurchase: true,
-    },
-  ];
+  // Fetch real reviews
+  let reviewsData = { reviews: [], total: 0, totalPages: 0 };
+  try {
+    reviewsData = await getProductReviews(product.id, 1, 5);
+  } catch (err) {
+    console.error("Failed to fetch reviews", err);
+  }
 
   // Generate structured data
   const jsonLd = {
@@ -100,7 +87,7 @@ export default async function ProductPage({ params }: PageProps) {
       priceCurrency: "USD",
       price: product.price,
       itemCondition: "https://schema.org/NewCondition",
-      availability: product.inventory > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     },
     aggregateRating: {
       "@type": "AggregateRating",
@@ -118,45 +105,13 @@ export default async function ProductPage({ params }: PageProps) {
       <Container className="pt-24 lg:pt-32">
         <Breadcrumb items={breadcrumbItems} />
         
-        <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-          {/* Left Column - Gallery */}
-          <div className="lg:sticky lg:top-24 self-start">
-            <ProductGallery images={product.images || [product.imageUrl]} alt={product.name} />
-          </div>
-
-          {/* Right Column - Product Info */}
-          <div className="flex flex-col">
-            <ProductInfo
-              title={product.name}
-              brand={product.brand}
-              price={product.price}
-              originalPrice={product.originalPrice}
-              rating={product.rating}
-              reviewCount={product.reviewCount}
-              isNew={product.isNew}
-            />
-
-            {product.variants && product.variants.length > 0 && (
-              <div className="mt-6">
-                <VariantSelector variants={product.variants} />
-              </div>
-            )}
-
-            <PurchaseActions product={product} />
-            <TrustFeatures />
-            <ProductDetails
-              description={product.description}
-              features={product.features}
-              specifications={product.specifications}
-            />
-          </div>
-        </div>
+        <ProductInteractiveArea product={product} />
 
         {/* Reviews Section */}
         <CustomerReviews
           rating={product.rating}
           reviewCount={product.reviewCount}
-          reviews={mockReviews}
+          reviews={reviewsData.reviews}
         />
 
         {/* Related Products Section */}

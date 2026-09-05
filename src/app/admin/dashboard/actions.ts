@@ -42,3 +42,39 @@ export async function createProduct(data: any) {
   revalidatePath("/admin/dashboard/products");
   return response.json();
 }
+
+export async function updateProduct(id: string, data: any) {
+  const response = await fetch(`${API_URL}/products/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-secret": ADMIN_SECRET,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to update product");
+  }
+
+  revalidatePath("/admin/dashboard/products");
+  return response.json();
+}
+
+export async function deleteProduct(id: string) {
+  const response = await fetch(`${API_URL}/products/${id}`, {
+    method: "DELETE",
+    headers: {
+      "x-admin-secret": ADMIN_SECRET,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to delete product");
+  }
+
+  revalidatePath("/admin/dashboard/products");
+  return response.json();
+}

@@ -94,7 +94,7 @@ export function CartSidebar() {
                       {item.variant && (
                         <p className="text-sm text-muted-foreground mt-0.5">
                           {item.variant.type === 'color' ? 'Color: ' : 'Size: '}
-                          {item.variant.name}
+                          {item.variant.options?.[0]?.name || item.variant.type}
                         </p>
                       )}
                     </div>
@@ -119,8 +119,8 @@ export function CartSidebar() {
                         {item.quantity}
                       </span>
                       <button 
-                        onClick={() => updateQuantity(item.id, Math.min((item.variant ? item.variant.inventory : item.product.inventory), item.quantity + 1))}
-                        disabled={item.quantity >= (item.variant ? item.variant.inventory : item.product.inventory)}
+                        onClick={() => updateQuantity(item.id, Math.min((item.variant ? (item.variant as any).inventory || (item.variant as any).stock || 0 : item.product.stock || 0), item.quantity + 1))}
+                        disabled={item.quantity >= (item.variant ? (item.variant as any).inventory || (item.variant as any).stock || 0 : item.product.stock || 0)}
                         className="flex-1 h-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-50"
                       >
                         <Plus className="w-3 h-3" />

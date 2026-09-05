@@ -1,5 +1,6 @@
-import { Star, CheckCircle2 } from "lucide-react";
-import { Review } from "@/types/product";
+import { Star, CheckCircle2, MessageSquareReply } from "lucide-react";
+import type { Review } from "@/services/reviewService";
+import Image from "next/image";
 
 interface CustomerReviewsProps {
   rating: number;
@@ -66,18 +67,16 @@ export function CustomerReviews({ rating, reviewCount, reviews }: CustomerReview
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center font-bold text-muted-foreground uppercase">
-                      {review.authorName.charAt(0)}
+                      {review.user?.firstName ? review.user.firstName.charAt(0) : "U"}
                     </div>
                     <div>
-                      <div className="font-semibold">{review.authorName}</div>
+                      <div className="font-semibold">{review.user?.firstName} {review.user?.lastName}</div>
                       <div className="flex items-center gap-2 text-xs mt-0.5">
-                        <span className="text-muted-foreground">{review.date}</span>
-                        {review.verifiedPurchase && (
-                          <span className="flex items-center gap-1 text-green-600 dark:text-green-500 font-medium">
-                            <CheckCircle2 className="w-3 h-3" />
-                            Verified Purchase
-                          </span>
-                        )}
+                        <span className="text-muted-foreground">{new Date(review.createdAt).toLocaleDateString()}</span>
+                        <span className="flex items-center gap-1 text-green-600 dark:text-green-500 font-medium">
+                          <CheckCircle2 className="w-3 h-3" />
+                          Verified Purchase
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -94,9 +93,33 @@ export function CustomerReviews({ rating, reviewCount, reviews }: CustomerReview
                     ))}
                   </div>
                 </div>
-                <p className="text-muted-foreground mt-2 leading-relaxed">
-                  {review.content}
-                </p>
+                {review.message && (
+                  <p className="text-muted-foreground mt-2 leading-relaxed">
+                    {review.message}
+                  </p>
+                )}
+                
+                {review.media && review.media.length > 0 && (
+                  <div className="flex gap-2 mt-2 overflow-x-auto pb-2">
+                    {review.media.map((img, i) => (
+                      <div key={i} className="relative w-20 h-20 rounded-md overflow-hidden border border-border shrink-0">
+                        <Image src={img} alt="Review Media" fill className="object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {review.adminReply && (
+                  <div className="mt-4 bg-muted/30 p-4 rounded-xl border border-border/50 relative">
+                    <div className="flex items-center gap-2 mb-2 text-primary font-semibold text-sm">
+                      <MessageSquareReply className="w-4 h-4" />
+                      Reply from Niovan Support
+                    </div>
+                    <p className="text-sm text-foreground/80 leading-relaxed">
+                      {review.adminReply}
+                    </p>
+                  </div>
+                )}
               </div>
             ))
           ) : (

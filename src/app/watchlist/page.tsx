@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { Container } from "@/components/ui/Container";
 import { ProductCard } from "@/components/products/ProductCard";
+import { ProductCardSkeleton } from "@/components/products/ProductCardSkeleton";
 import { Button } from "@/components/ui/Button";
+import { Skeleton } from "@/components/ui/Skeleton";
 import { Heart, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useWatchlistStore } from "@/store/useWatchlistStore";
@@ -25,7 +27,29 @@ export default function WatchlistPage() {
     openCart();
   };
 
-  if (!isMounted) return null;
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-background pt-32 pb-20">
+        <Container>
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+            <div>
+              <Skeleton className="h-10 w-64 mb-2" />
+              <Skeleton className="h-5 w-40" />
+            </div>
+            <div className="flex gap-3">
+              <Skeleton className="h-10 w-24 rounded-md" />
+              <Skeleton className="h-10 w-40 rounded-md" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
+        </Container>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background pt-32 pb-20">

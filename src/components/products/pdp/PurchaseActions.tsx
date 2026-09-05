@@ -16,7 +16,7 @@ export function PurchaseActions({ product }: PurchaseActionsProps) {
   const [isAdded, setIsAdded] = useState(false);
   
   const addItem = useCartStore((state) => state.addItem);
-  const inventory = product.inventory;
+  const inventory = product.stock ?? 0;
 
   const handleDecrease = () => setQuantity((q) => Math.max(1, q - 1));
   const handleIncrease = () => setQuantity((q) => Math.min(inventory, q + 1));

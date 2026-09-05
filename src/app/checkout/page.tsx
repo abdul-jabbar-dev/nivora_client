@@ -8,19 +8,80 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { ChevronRight, ShieldCheck, CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/useAuthStore";
+import { Skeleton } from "@/components/ui/Skeleton";
+
+const api = {
+  get: async (url: string) => fetch(`http://localhost:3005${url}`, { headers: { Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` } }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); }),
+  post: async (url: string, data: any) => fetch(`http://localhost:3005${url}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` }, body: JSON.stringify(data) }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); }),
+  patch: async (url: string, data: any) => fetch(`http://localhost:3005${url}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` }, body: JSON.stringify(data) }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); })
+};
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, getCartTotal, clearCart } = useCartStore();
+  const { user, session } = useAuthStore();
+  
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    address: '',
+    city: '',
+    zip: '',
+    landmark: '',
+    phoneNumber: '',
+    bkashNumber: '',
+    trxId: ''
+  });
   const [isMounted, setIsMounted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<'bkash' | 'cod'>('bkash');
   const [shippingMethod, setShippingMethod] = useState<'sameday' | 'nationwide'>('nationwide');
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!session) {
+        setIsLoadingProfile(false);
+        return;
+      }
+      
+      try {
+        const response = await api.get('/users/profile');
+        const profile = response.data;
+        if (profile) {
+          setFormData(prev => ({
+            ...prev,
+            firstName: profile.firstName || '',
+            lastName: profile.lastName || '',
+            address: profile.address || '',
+            city: profile.city || '',
+            zip: profile.zip || '',
+            landmark: profile.landmark || '',
+            phoneNumber: profile.phoneNumber || ''
+          }));
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile', err);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+    
+    if (isMounted) {
+      fetchProfile();
+    }
+  }, [session, isMounted]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
 
   const subtotal = getCartTotal();
   const shipping = shippingMethod === 'sameday' ? 70 : 130;
@@ -29,14 +90,56 @@ export default function CheckoutPage() {
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!session) {
+      // If no user logged in, redirect to login
+      router.push('/login?redirect=/checkout');
+      return;
+    }
+    
     setIsProcessing(true);
     
-    // Simulate payment processing
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    
-    setIsProcessing(false);
-    setIsSuccess(true);
-    clearCart();
+    try {
+      // First update profile with the new address if they changed it
+      await api.patch('/users/profile', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        address: formData.address,
+        city: formData.city,
+        zip: formData.zip,
+        landmark: formData.landmark,
+        phoneNumber: formData.phoneNumber
+      });
+      
+      // Then create the order
+      const orderPayload = {
+        total,
+        address: formData.address,
+        city: formData.city,
+        zip: formData.zip,
+        landmark: formData.landmark,
+        phoneNumber: formData.phoneNumber,
+        paymentMethod,
+        shippingMethod,
+        bkashNumber: formData.bkashNumber,
+        trxId: formData.trxId,
+        items: items.map(item => ({
+          productId: item.product.id,
+          quantity: item.quantity,
+          price: item.product.price
+        }))
+      };
+      
+      await api.post('/orders', orderPayload);
+      
+      setIsSuccess(true);
+      clearCart();
+    } catch (err) {
+      console.error('Checkout failed', err);
+      alert('Checkout failed. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (!isMounted) return null;
@@ -100,34 +203,58 @@ export default function CheckoutPage() {
               <div className="space-y-4">
                 <div className="grid gap-2">
                   <label htmlFor="email" className="text-sm font-medium">Email address</label>
-                  <input required type="email" id="email" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" placeholder="you@example.com" />
+                  {isLoadingProfile ? (
+                    <Skeleton className="h-12 w-full rounded-md" />
+                  ) : (
+                    <input value={user?.email || ''} disabled type="email" id="email" className="flex h-12 w-full rounded-md border border-border bg-muted px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50" placeholder="you@example.com" />
+                  )}
                 </div>
               </div>
 
               <div>
                 <h2 className="text-2xl font-bold mb-6">Shipping Address</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="grid gap-2">
-                    <label htmlFor="firstName" className="text-sm font-medium">First name</label>
-                    <input required type="text" id="firstName" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                {isLoadingProfile ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid gap-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-12 w-full rounded-md" /></div>
+                    <div className="grid gap-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-12 w-full rounded-md" /></div>
+                    <div className="grid gap-2 md:col-span-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-12 w-full rounded-md" /></div>
+                    <div className="grid gap-2"><Skeleton className="h-4 w-32" /><Skeleton className="h-12 w-full rounded-md" /></div>
+                    <div className="grid gap-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-12 w-full rounded-md" /></div>
+                    <div className="grid gap-2"><Skeleton className="h-4 w-16" /><Skeleton className="h-12 w-full rounded-md" /></div>
+                    <div className="grid gap-2"><Skeleton className="h-4 w-24" /><Skeleton className="h-12 w-full rounded-md" /></div>
                   </div>
-                  <div className="grid gap-2">
-                    <label htmlFor="lastName" className="text-sm font-medium">Last name</label>
-                    <input required type="text" id="lastName" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid gap-2">
+                      <label htmlFor="firstName" className="text-sm font-medium">First name</label>
+                      <input required value={formData.firstName} onChange={handleChange} type="text" id="firstName" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                    </div>
+                    <div className="grid gap-2">
+                      <label htmlFor="lastName" className="text-sm font-medium">Last name</label>
+                      <input required value={formData.lastName} onChange={handleChange} type="text" id="lastName" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                    </div>
+                    <div className="grid gap-2 md:col-span-2">
+                      <label htmlFor="address" className="text-sm font-medium">Address</label>
+                      <input required value={formData.address} onChange={handleChange} type="text" id="address" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                    </div>
+                    <div className="grid gap-2">
+                      <label htmlFor="landmark" className="text-sm font-medium">Landmark (Optional)</label>
+                      <input value={formData.landmark} onChange={handleChange} type="text" id="landmark" placeholder="e.g. Near the big banyan tree" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                    </div>
+                    <div className="grid gap-2">
+                      <label htmlFor="phoneNumber" className="text-sm font-medium">Phone Number</label>
+                      <input required value={formData.phoneNumber} onChange={handleChange} type="tel" id="phoneNumber" placeholder="01XXXXXXXXX" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                    </div>
+                    <div className="grid gap-2">
+                      <label htmlFor="city" className="text-sm font-medium">City</label>
+                      <input required value={formData.city} onChange={handleChange} type="text" id="city" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                    </div>
+                    <div className="grid gap-2">
+                      <label htmlFor="zip" className="text-sm font-medium">Postal code</label>
+                      <input required value={formData.zip} onChange={handleChange} type="text" id="zip" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                    </div>
                   </div>
-                  <div className="grid gap-2 md:col-span-2">
-                    <label htmlFor="address" className="text-sm font-medium">Address</label>
-                    <input required type="text" id="address" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
-                  </div>
-                  <div className="grid gap-2">
-                    <label htmlFor="city" className="text-sm font-medium">City</label>
-                    <input required type="text" id="city" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
-                  </div>
-                  <div className="grid gap-2">
-                    <label htmlFor="zip" className="text-sm font-medium">Postal code</label>
-                    <input required type="text" id="zip" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
-                  </div>
-                </div>
+                )}
               </div>
 
               <div>
@@ -202,11 +329,11 @@ export default function CheckoutPage() {
                         </div>
                         <div className="grid gap-2">
                           <label htmlFor="bkashNumber" className="text-sm font-medium">Your bKash Number</label>
-                          <input required={paymentMethod === 'bkash'} type="text" id="bkashNumber" placeholder="01XXXXXXXXX" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                          <input required={paymentMethod === 'bkash'} value={formData.bkashNumber} onChange={handleChange} type="text" id="bkashNumber" placeholder="01XXXXXXXXX" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                         </div>
                         <div className="grid gap-2">
                           <label htmlFor="trxId" className="text-sm font-medium">Transaction ID (TrxID)</label>
-                          <input required={paymentMethod === 'bkash'} type="text" id="trxId" placeholder="e.g. 8NX9QA5V" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                          <input required={paymentMethod === 'bkash'} value={formData.trxId} onChange={handleChange} type="text" id="trxId" placeholder="e.g. 8NX9QA5V" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                         </div>
                       </div>
                     )}
@@ -277,7 +404,7 @@ export default function CheckoutPage() {
                     <h3 className="font-medium text-sm line-clamp-1">{item.product.name}</h3>
                     {item.variant && (
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {item.variant.name}
+                        {item.variant.options?.[0]?.name || item.variant.type}
                       </p>
                     )}
                   </div>

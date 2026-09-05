@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useCartStore } from "@/store/useCartStore";
+import { useWatchlistStore } from "@/store/useWatchlistStore";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -27,6 +29,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
+      
+      if (session?.user) {
+        useCartStore.getState().syncWithBackend();
+        useWatchlistStore.getState().syncWithBackend();
+      }
     });
 
     // Listen for changes on auth state (log in, sign out, etc.)
@@ -36,6 +43,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
+      
+      if (_event === 'SIGNED_IN' || session?.user) {
+        useCartStore.getState().syncWithBackend();
+        useWatchlistStore.getState().syncWithBackend();
+      } else if (_event === 'SIGNED_OUT') {
+        useCartStore.getState().clearCart();
+        useWatchlistStore.getState().clearWatchlist();
+      }
     });
 
     return () => subscription.unsubscribe();

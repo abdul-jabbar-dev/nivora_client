@@ -49,13 +49,15 @@ export function ShopByCategory() {
                   href={`/categories/${category.slug}`}
                   className="group relative flex h-[250px] md:h-[400px] w-full flex-col overflow-hidden rounded-2xl bg-muted"
                 >
-                  <Image
-                    src={category.imageUrl}
-                    alt={category.name}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
-                  />
+                  {category.imageUrl ? (
+                    <Image
+                      src={category.imageUrl}
+                      alt={category.name}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-105"
+                      sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+                    />
+                  ) : null}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
                   
                   <div className="absolute bottom-0 left-0 right-0 p-6 text-white translate-y-4 transition-transform duration-300 group-hover:translate-y-0">

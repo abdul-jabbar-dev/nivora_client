@@ -1,6 +1,26 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Product, ProductVariant } from "@/types/product";
+import { useAuthStore } from "./useAuthStore";
+
+const API_URL = "http://localhost:3005";
+
+const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  const token = (useAuthStore.getState().session as any)?.access_token;
+  if (!token) throw new Error("No token");
+  
+  return fetch(`${API_URL}${url}`, {
+    ...options,
+    headers: {
+      ...options.headers,
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  }).then(async r => {
+    if (!r.ok) throw await r.json();
+    return r.json();
+  });
+};
 
 export interface CartItem {
   id: string; // unique combination of product ID and variant ID
@@ -21,6 +41,7 @@ interface CartStore {
   closeCart: () => void;
   getCartTotal: () => number;
   getCartCount: () => number;
+  syncWithBackend: () => Promise<void>;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -29,8 +50,8 @@ export const useCartStore = create<CartStore>()(
       items: [],
       isOpen: false,
       
-      addItem: (product, variant, quantity = 1) => {
-        const id = variant ? `${product.id}-${variant.id}` : product.id;
+      addItem: async (product, variant, quantity = 1) => {
+        const id = variant ? `${product.id}-${variant.type}` : product.id;
         
         set((state) => {
           const existingItem = state.items.find((item) => item.id === id);
@@ -50,21 +71,48 @@ export const useCartStore = create<CartStore>()(
           };
         });
         
+        if (useAuthStore.getState().user) {
+          try {
+            await fetchWithAuth('/cart/items', { 
+              method: 'POST', 
+              body: JSON.stringify({ productId: product.id, variant: variant?.type || null, quantity }) 
+            });
+          } catch (err) { console.error('Failed to add to DB cart', err); }
+        }
+
         // Open the cart when an item is added
         get().openCart();
       },
       
-      removeItem: (id) =>
+      removeItem: async (id) => {
+        const itemToRemove = get().items.find(i => i.id === id);
         set((state) => ({
           items: state.items.filter((item) => item.id !== id),
-        })),
+        }));
+        if (useAuthStore.getState().user && itemToRemove) {
+          try {
+            const variantPath = itemToRemove.variant ? `/${itemToRemove.variant.type}` : '';
+            await fetchWithAuth(`/cart/items/${itemToRemove.product.id}${variantPath}`, { method: 'DELETE' });
+          } catch (err) { console.error('Failed to remove from DB cart', err); }
+        }
+      },
         
-      updateQuantity: (id, quantity) =>
+      updateQuantity: async (id, quantity) => {
+        const itemToUpdate = get().items.find(i => i.id === id);
         set((state) => ({
           items: state.items.map((item) =>
             item.id === id ? { ...item, quantity } : item
           ),
-        })),
+        }));
+        if (useAuthStore.getState().user && itemToUpdate) {
+          try {
+            await fetchWithAuth('/cart/items', { 
+              method: 'PUT', 
+              body: JSON.stringify({ productId: itemToUpdate.product.id, variant: itemToUpdate.variant?.type || null, quantity }) 
+            });
+          } catch (err) { console.error('Failed to update DB cart quantity', err); }
+        }
+      },
         
       clearCart: () => set({ items: [] }),
       
@@ -80,7 +128,38 @@ export const useCartStore = create<CartStore>()(
       getCartCount: () => {
         const { items } = get();
         return items.reduce((count, item) => count + item.quantity, 0);
+      },
+
+      syncWithBackend: async () => {
+        if (!useAuthStore.getState().user) return;
+        try {
+          // Push local items to backend to merge
+          const localItems = get().items;
+          const syncData = localItems.map(item => ({
+            productId: item.product.id,
+            variant: item.variant?.type || null,
+            quantity: item.quantity
+          }));
+          
+          const dbCart = await fetchWithAuth('/cart/sync', { 
+            method: 'POST', 
+            body: JSON.stringify({ items: syncData }) 
+          });
+          
+          if (dbCart && dbCart.items) {
+            const mergedItems = dbCart.items.map((item: any) => ({
+              id: item.variant ? `${item.productId}-${item.variant}` : item.productId,
+              product: item.product,
+              variant: item.variant ? { type: item.variant, label: item.variant } : undefined, // simplified variant mapping
+              quantity: item.quantity
+            }));
+            set({ items: mergedItems });
+          }
+        } catch (err) {
+          console.error("Failed to sync cart", err);
+        }
       }
+
     }),
     {
       name: "premium-cart-storage",

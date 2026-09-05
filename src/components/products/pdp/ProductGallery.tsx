@@ -7,10 +7,16 @@ import { cn } from "@/lib/utils";
 interface ProductGalleryProps {
   images: string[];
   alt: string;
+  activeIndex?: number;
+  setActiveIndex?: (index: number) => void;
+  overrideImage?: string | null;
 }
 
-export function ProductGallery({ images, alt }: ProductGalleryProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
+export function ProductGallery({ images, alt, activeIndex: controlledIndex, setActiveIndex: setControlledIndex, overrideImage }: ProductGalleryProps) {
+  const [localIndex, setLocalIndex] = useState(0);
+
+  const activeIndex = controlledIndex !== undefined ? controlledIndex : localIndex;
+  const setActiveIndex = setControlledIndex || setLocalIndex;
 
   if (!images?.length) return null;
 
@@ -19,17 +25,17 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
       {/* Main Image */}
       <div className="relative aspect-square md:aspect-[4/5] bg-muted rounded-2xl overflow-hidden group">
         <Image
-          src={images[activeIndex]}
+          src={overrideImage || images[activeIndex]}
           alt={`${alt} - Image ${activeIndex + 1}`}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           priority
           className="object-cover transition-transform duration-500 md:group-hover:scale-105"
-          sizes="(min-width: 1024px) 50vw, 100vw"
         />
       </div>
 
       {/* Thumbnails */}
-      {images.length > 1 && (
+      {images.length > 0 && (
         <div className="flex gap-4 overflow-x-auto pb-2 -mb-2 snap-x">
           {images.map((image, idx) => (
             <button
@@ -47,8 +53,8 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
                 src={image}
                 alt={`Thumbnail ${idx + 1}`}
                 fill
+                sizes="(max-width: 768px) 33vw, 20vw"
                 className="object-cover"
-                sizes="(min-width: 768px) 96px, 80px"
               />
             </button>
           ))}
