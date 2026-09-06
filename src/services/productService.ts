@@ -34,14 +34,24 @@ export interface GetProductsParams {
   sort?: string;
   page?: number;
   limit?: number;
+  filter?: string;
+  q?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
 }
 
 export async function getProducts(params: GetProductsParams): Promise<{ products: Product[], total: number, totalPages: number }> {
   const searchParams = new URLSearchParams();
   if (params.category) searchParams.append('category', params.category);
   if (params.sort) searchParams.append('sort', params.sort);
+  if (params.filter) searchParams.append('filter', params.filter);
   if (params.page) searchParams.append('page', params.page.toString());
   if (params.limit) searchParams.append('limit', params.limit.toString());
+  if (params.q) searchParams.append('q', params.q);
+  if (params.minPrice !== undefined) searchParams.append('minPrice', params.minPrice.toString());
+  if (params.maxPrice !== undefined) searchParams.append('maxPrice', params.maxPrice.toString());
+  if (params.minRating !== undefined) searchParams.append('minRating', params.minRating.toString());
 
   const response = await fetch(`${API_URL}/products?${searchParams.toString()}`, { next: { revalidate: 60 } });
   if (!response.ok) throw new Error('Failed to fetch products');

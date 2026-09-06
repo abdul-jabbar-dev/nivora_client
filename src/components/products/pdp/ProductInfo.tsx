@@ -8,6 +8,8 @@ interface ProductInfoProps {
   rating: number;
   reviewCount: number;
   isNew?: boolean;
+  offerPrice?: number | null;
+  discountExpiryDate?: string | null;
 }
 
 export function ProductInfo({
@@ -18,8 +20,12 @@ export function ProductInfo({
   rating,
   reviewCount,
   isNew,
+  offerPrice,
+  discountExpiryDate,
 }: ProductInfoProps) {
-  const discountAmount = originalPrice ? originalPrice - price : 0;
+  const currentPrice = offerPrice ?? price;
+  const oldPrice = offerPrice ? price : originalPrice;
+  const discountAmount = oldPrice ? oldPrice - currentPrice : 0;
   
   return (
     <div className="flex flex-col gap-4">
@@ -60,17 +66,24 @@ export function ProductInfo({
       {/* Price */}
       <div className="flex flex-col gap-1 mt-4">
         <div className="flex items-baseline gap-3">
-          <span className="text-3xl font-bold">৳{price.toFixed(2)}</span>
-          {originalPrice && (
+          <span className="text-3xl font-bold">৳{currentPrice.toFixed(2)}</span>
+          {oldPrice && oldPrice > currentPrice && (
             <span className="text-lg text-muted-foreground line-through">
-              ৳{originalPrice.toFixed(2)}
+              ৳{oldPrice.toFixed(2)}
             </span>
           )}
         </div>
         {discountAmount > 0 && (
-          <span className="text-sm font-medium text-green-600 dark:text-green-500">
-            You save ৳{discountAmount.toFixed(2)} ({Math.round((discountAmount / originalPrice!) * 100)}%)
-          </span>
+          <div className="flex flex-col gap-1">
+            <span className="text-sm font-medium text-green-600 dark:text-green-500">
+              You save ৳{discountAmount.toFixed(2)} ({Math.round((discountAmount / oldPrice!) * 100)}%)
+            </span>
+            {discountExpiryDate && (
+              <span className="text-xs font-semibold text-orange-600 dark:text-orange-500 bg-orange-100 dark:bg-orange-900/30 px-2 py-1 rounded-md w-fit">
+                Offer ends on {new Date(discountExpiryDate).toLocaleDateString()}
+              </span>
+            )}
+          </div>
         )}
       </div>
     </div>

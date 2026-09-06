@@ -1,22 +1,42 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
-import { SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X, Search, Star } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Category } from "@/types/product";
 
 interface ProductFiltersProps {
   categories: Category[];
   initialCategory?: string;
+  initialQ?: string;
+  initialMinPrice?: string;
+  initialMaxPrice?: string;
+  initialMinRating?: string;
 }
 
-export function ProductFilters({ categories, initialCategory = "all" }: ProductFiltersProps) {
+export function ProductFilters({ 
+  categories, 
+  initialCategory = "all",
+  initialQ = "",
+  initialMinPrice = "",
+  initialMaxPrice = "",
+  initialMinRating = "",
+}: ProductFiltersProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
+  const [q, setQ] = useState(initialQ);
+  const [minPrice, setMinPrice] = useState(initialMinPrice);
+  const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
+
+  useEffect(() => {
+    setQ(initialQ || "");
+    setMinPrice(initialMinPrice || "");
+    setMaxPrice(initialMaxPrice || "");
+  }, [initialQ, initialMinPrice, initialMaxPrice]);
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
@@ -33,40 +53,100 @@ export function ProductFilters({ categories, initialCategory = "all" }: ProductF
   );
 
   const handleCategoryChange = (slug: string) => {
-    router.push(pathname + "?" + createQueryString("category", slug));
+    router.push(pathname + "?" + createQueryString("category", slug), { scroll: false });
     setIsOpen(false);
+  };
+
+  const handleFilterChange = (name: string, value: string) => {
+    router.push(pathname + "?" + createQueryString(name, value), { scroll: false });
+  };
+
+  const applyPriceFilter = () => {
+    let params = new URLSearchParams(searchParams.toString());
+    if (minPrice) params.set("minPrice", minPrice);
+    else params.delete("minPrice");
+    if (maxPrice) params.set("maxPrice", maxPrice);
+    else params.delete("maxPrice");
+    params.delete("page");
+    router.push(pathname + "?" + params.toString(), { scroll: false });
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleFilterChange("q", q);
   };
 
   const FilterContent = () => (
     <div className="flex flex-col gap-8">
+      {/* Search */}
+      <form onSubmit={handleSearch} className="relative flex items-center">
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="w-full h-10 pl-4 pr-10 text-sm bg-muted/50 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50"
+        />
+        <button type="submit" className="absolute right-2 p-1.5 text-muted-foreground hover:text-foreground transition-colors">
+          <Search className="h-4 w-4" />
+        </button>
+      </form>
+
+
+      {/* Price Range */}
       <div>
-        <h3 className="font-semibold mb-4 text-sm tracking-wider uppercase text-muted-foreground">Category</h3>
+        <h3 className="font-semibold mb-4 text-sm tracking-wider uppercase text-muted-foreground">Price Range</h3>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            placeholder="Min"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            className="w-full h-9 px-3 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+          <span className="text-muted-foreground">-</span>
+          <input
+            type="number"
+            placeholder="Max"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            className="w-full h-9 px-3 text-sm bg-muted/50 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+        </div>
+        <Button onClick={applyPriceFilter} variant="outline" size="sm" className="w-full mt-3 h-8">
+          Apply Price
+        </Button>
+      </div>
+
+      {/* Rating */}
+      <div>
+        <h3 className="font-semibold mb-4 text-sm tracking-wider uppercase text-muted-foreground">Rating</h3>
         <div className="flex flex-col gap-3">
-          <button
-            onClick={() => handleCategoryChange("all")}
-            className={cn(
-              "text-left transition-colors hover:text-foreground",
-              initialCategory === "all" ? "font-semibold text-foreground" : "text-muted-foreground"
-            )}
-          >
-            Shop
-          </button>
-          {categories.map((c) => {
-            const isSelected = initialCategory === c.slug;
-            return (
-              <button
-                key={c.id}
-                onClick={() => handleCategoryChange(c.slug)}
-                className={cn(
-                  "text-left transition-colors hover:text-foreground flex items-center justify-between",
-                  isSelected ? "font-semibold text-foreground" : "text-muted-foreground"
-                )}
-              >
-                <span>{c.name}</span>
-                <span className="text-xs px-2 py-0.5 rounded-full bg-muted">{c.productCount}</span>
-              </button>
-            );
-          })}
+          {[4, 3, 2, 1].map((rating) => (
+            <button
+              key={rating}
+              onClick={() => handleFilterChange("minRating", rating.toString())}
+              className={cn(
+                "flex items-center gap-2 text-sm transition-colors hover:text-foreground",
+                initialMinRating === rating.toString() ? "font-semibold text-foreground" : "text-muted-foreground"
+              )}
+            >
+              <div className="flex items-center text-amber-400">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className={cn("w-4 h-4", i < rating ? "fill-current" : "text-muted-foreground/30")} />
+                ))}
+              </div>
+              <span>& Up</span>
+            </button>
+          ))}
+          {initialMinRating && (
+            <button 
+              onClick={() => handleFilterChange("minRating", "")}
+              className="text-left text-xs text-muted-foreground hover:text-foreground mt-2"
+            >
+              Clear Rating
+            </button>
+          )}
         </div>
       </div>
     </div>

@@ -14,17 +14,31 @@ export const metadata: Metadata = {
   description: "Better Things, Better Everyday.",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  let navCategories = [];
+  let allCategories = [];
+  try {
+    const res = await fetch("http://localhost:3005/products/categories", {
+      next: { revalidate: 60 } // cache for 60s
+    });
+    if (res.ok) {
+      allCategories = await res.json();
+      navCategories = allCategories.filter((c: any) => c.showNav);
+    }
+  } catch (e) {
+    console.error("Failed to fetch categories for nav", e);
+  }
+
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
         <Providers>
           <div className="flex min-h-screen flex-col">
-            <Navbar />
+            <Navbar navCategories={navCategories} allCategories={allCategories} />
             <main className="flex-1 pb-16 md:pb-0">{children}</main>
             <Footer />
           </div>

@@ -56,10 +56,19 @@ export function ProductInteractiveArea({ product }: ProductInteractiveAreaProps)
           brand={product.brand}
           price={product.price}
           originalPrice={product.originalPrice}
+          offerPrice={product.offerPrice}
+          discountExpiryDate={product.discountExpiryDate}
           rating={product.rating}
           reviewCount={product.reviewCount}
           isNew={product.isNew}
         />
+
+        {product.status === "upcoming" && product.expectedArrivalDate && (
+          <div className="mt-4 p-4 rounded-lg bg-blue-50/50 border border-blue-100 text-blue-800">
+            <h3 className="font-semibold mb-1">Coming Soon</h3>
+            <p className="text-sm">Expected Arrival: {new Date(product.expectedArrivalDate).toLocaleDateString()}</p>
+          </div>
+        )}
 
         {product.variants && product.variants.length > 0 && (
           <div className="mt-6">

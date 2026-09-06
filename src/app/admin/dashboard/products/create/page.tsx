@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { createProduct } from "../../actions";
 import { Button } from "@/components/ui/Button";
 
@@ -13,7 +14,10 @@ interface Category {
   name: string;
 }
 
-export default function ProductsAdminPage() {
+function ProductsAdminPageContent() {
+  const searchParams = useSearchParams();
+  const isUpcoming = searchParams.get("upcoming") === "true";
+
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +25,8 @@ export default function ProductsAdminPage() {
   
   // New fields state
   const [visibleStatus, setVisibleStatus] = useState("show on store");
-  const [status, setStatus] = useState("active");
+  const [status, setStatus] = useState(isUpcoming ? "upcoming" : "active");
+  const [expectedArrivalDate, setExpectedArrivalDate] = useState("");
   const [offerPrice, setOfferPrice] = useState("");
   const [sourceName, setSourceName] = useState("");
   const [sourceNumber, setSourceNumber] = useState("");
@@ -191,6 +196,7 @@ export default function ProductsAdminPage() {
         stock,
         variants: formattedVariations.length > 0 ? formattedVariations : null,
         specifications: formattedSpecifications.length > 0 ? formattedSpecifications : null,
+        expectedArrivalDate: expectedArrivalDate ? new Date(expectedArrivalDate).toISOString() : null,
       };
 
       await createProduct(data);
@@ -273,10 +279,17 @@ export default function ProductsAdminPage() {
               <label className="text-sm font-medium">Product Status</label>
               <select value={status} onChange={(e) => setStatus(e.target.value)} className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
                 <option value="active">Active</option>
+                <option value="upcoming">Upcoming</option>
                 <option value="block">Block</option>
                 <option value="restricted">Restricted</option>
               </select>
             </div>
+            {status === "upcoming" && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Expected Coming Date</label>
+                <input value={expectedArrivalDate} onChange={(e) => setExpectedArrivalDate(e.target.value)} type="date" required className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" />
+              </div>
+            )}
           </div>
           
           <div className="space-y-4 border-t border-border pt-4">
@@ -443,5 +456,13 @@ export default function ProductsAdminPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ProductsAdminPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <ProductsAdminPageContent />
+    </Suspense>
   );
 }

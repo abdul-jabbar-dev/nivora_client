@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ShoppingBag, User } from "lucide-react";
+import { Search, ShoppingBag, User, Package, Heart, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/ui/Container";
 import { useCartStore } from "@/store/useCartStore";
@@ -12,17 +12,25 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 
-const NAV_LINKS = [
-  { name: "Shop", href: "/shop" },
-  { name: "Electronics", href: "/shop?category=electronics" },
-  { name: "Fashion", href: "/shop?category=fashion" },
-  { name: "Home & Living", href: "/shop?category=home-living" },
-];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  showNav: boolean;
+  parentId: string | null;
+}
 
-export function Navbar() {
+export function Navbar({ navCategories = [], allCategories = [] }: { navCategories?: Category[], allCategories?: Category[] }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  
+  // Megamenu state
+  const [isMegamenuOpen, setIsMegamenuOpen] = useState(false);
+  const [activeParentId, setActiveParentId] = useState<string | null>(null);
+  const [activeChildId, setActiveChildId] = useState<string | null>(null);
+  const megamenuTimerRef = useRef<NodeJS.Timeout | null>(null);
+
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   
@@ -81,13 +89,104 @@ export function Navbar() {
             </Link>
             
             <nav className="hidden md:flex items-center gap-6">
-              {NAV_LINKS.map((link) => (
+              <div 
+                className="relative"
+                onMouseEnter={() => {
+                  if (megamenuTimerRef.current) clearTimeout(megamenuTimerRef.current);
+                  setIsMegamenuOpen(true);
+                }}
+                onMouseLeave={() => {
+                  megamenuTimerRef.current = setTimeout(() => setIsMegamenuOpen(false), 200);
+                }}
+              >
+                <Link href="/shop" className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors relative group py-4">
+                  Shop
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-foreground transition-all group-hover:w-full" />
+                </Link>
+                
+                {/* Megamenu Dropdown */}
+                <AnimatePresence>
+                  {isMegamenuOpen && allCategories.length > 0 && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-0 mt-2 bg-background border border-border rounded-xl shadow-xl flex z-50 overflow-hidden min-h-[300px]"
+                    >
+                      {/* Column 1: Root Categories */}
+                      <div className="w-64 border-r border-border bg-muted/20 py-2">
+                        {allCategories.filter(c => !c.parentId).map(parent => (
+                          <div 
+                            key={parent.id}
+                            onMouseEnter={() => {
+                              setActiveParentId(parent.id);
+                              setActiveChildId(null);
+                            }}
+                            className={cn(
+                              "px-4 py-2.5 text-sm cursor-pointer flex items-center justify-between transition-colors",
+                              activeParentId === parent.id ? "bg-muted font-medium text-primary" : "text-foreground hover:bg-muted/50"
+                            )}
+                          >
+                            <Link href={`/shop?category=${parent.slug}`} className="flex-1" onClick={() => setIsMegamenuOpen(false)}>
+                              {parent.name}
+                            </Link>
+                            {allCategories.some(c => c.parentId === parent.id) && (
+                              <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Column 2: Subcategories */}
+                      {activeParentId && allCategories.some(c => c.parentId === activeParentId) && (
+                        <div className="w-64 border-r border-border bg-background py-2">
+                          {allCategories.filter(c => c.parentId === activeParentId).map(child => (
+                            <div 
+                              key={child.id}
+                              onMouseEnter={() => setActiveChildId(child.id)}
+                              className={cn(
+                                "px-4 py-2 text-sm cursor-pointer flex items-center justify-between transition-colors",
+                                activeChildId === child.id ? "font-medium text-primary" : "text-muted-foreground hover:text-foreground"
+                              )}
+                            >
+                              <Link href={`/shop?category=${child.slug}`} className="flex-1" onClick={() => setIsMegamenuOpen(false)}>
+                                {child.name}
+                              </Link>
+                              {allCategories.some(c => c.parentId === child.id) && (
+                                <svg className="w-4 h-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path></svg>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Column 3: Grandchild Categories */}
+                      {activeChildId && allCategories.some(c => c.parentId === activeChildId) && (
+                        <div className="w-64 bg-background py-2">
+                          {allCategories.filter(c => c.parentId === activeChildId).map(grandchild => (
+                            <div 
+                              key={grandchild.id}
+                              className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                              <Link href={`/shop?category=${grandchild.slug}`} className="block w-full" onClick={() => setIsMegamenuOpen(false)}>
+                                {grandchild.name}
+                              </Link>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              {navCategories.map((cat) => (
                 <Link
-                  key={link.name}
-                  href={link.href}
+                  key={cat.id}
+                  href={`/shop?category=${cat.slug}`}
                   className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors relative group"
                 >
-                  {link.name}
+                  {cat.name}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-foreground transition-all group-hover:w-full" />
                 </Link>
               ))}
@@ -95,9 +194,6 @@ export function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <button className="p-2 text-foreground/80 hover:text-foreground transition-colors">
-              <Search className="w-5 h-5" />
-            </button>
             <div className="relative" ref={profileRef}>
               {user ? (
                 <>
@@ -111,23 +207,39 @@ export function Navbar() {
                   <AnimatePresence>
                     {isProfileOpen && (
                       <motion.div 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
                         transition={{ duration: 0.2 }}
-                        className="absolute right-0 mt-2 w-48 bg-background border border-border rounded-xl shadow-lg py-2 flex flex-col z-50 overflow-hidden"
+                        className="absolute right-0 mt-3 w-56 bg-background border border-border rounded-xl shadow-xl flex flex-col z-50 overflow-hidden"
                       >
-                        <Link href="/profile" onClick={() => setIsProfileOpen(false)} className="px-4 py-2 text-sm hover:bg-muted transition-colors">My Profile</Link>
-                        <Link href="/orders" onClick={() => setIsProfileOpen(false)} className="px-4 py-2 text-sm hover:bg-muted transition-colors">My Orders</Link>
-                        <Link href="/watchlist" onClick={() => setIsProfileOpen(false)} className="px-4 py-2 text-sm hover:bg-muted transition-colors">My Watchlist</Link>
-                        <button 
-                          onClick={() => { openCart(); setIsProfileOpen(false); }} 
-                          className="px-4 py-2 text-sm hover:bg-muted transition-colors text-left"
-                        >
-                          My Cart
-                        </button>
-                        <div className="h-px bg-border my-1" />
-                        <button onClick={handleLogout} className="px-4 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors text-left">Logout</button>
+                        <div className="px-4 py-3 bg-muted/30 border-b border-border">
+                          <p className="text-sm font-medium text-foreground">My Account</p>
+                          <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                        </div>
+                        <div className="p-2 flex flex-col gap-1">
+                          <Link href="/profile" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
+                            <User className="w-4 h-4 text-muted-foreground" /> My Profile
+                          </Link>
+                          <Link href="/orders" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
+                            <Package className="w-4 h-4 text-muted-foreground" /> My Orders
+                          </Link>
+                          <Link href="/watchlist" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
+                            <Heart className="w-4 h-4 text-muted-foreground" /> My Watchlist
+                          </Link>
+                          <button 
+                            onClick={() => { openCart(); setIsProfileOpen(false); }} 
+                            className="flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors text-left w-full"
+                          >
+                            <ShoppingBag className="w-4 h-4 text-muted-foreground" /> My Cart
+                          </button>
+                        </div>
+                        <div className="h-px bg-border" />
+                        <div className="p-2">
+                          <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2 text-sm text-red-600 rounded-md hover:bg-red-50 hover:text-red-700 transition-colors text-left w-full">
+                            <LogOut className="w-4 h-4" /> Logout
+                          </button>
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>

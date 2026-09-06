@@ -13,9 +13,10 @@ import { useState, useEffect } from "react";
 interface ProductCardProps {
   product: Product;
   className?: string;
+  hideDiscountInfo?: boolean;
 }
 
-export function ProductCard({ product, className }: ProductCardProps) {
+export function ProductCard({ product, className, hideDiscountInfo = false }: ProductCardProps) {
   const addItem = useCartStore((state) => state.addItem);
   const { addItem: addWatchlist, removeItem: removeWatchlist, isInWatchlist } = useWatchlistStore();
   
@@ -35,8 +36,11 @@ export function ProductCard({ product, className }: ProductCardProps) {
     }
   };
 
-  const discount = product.originalPrice
-    ? Math.round((1 - product.price / product.originalPrice) * 100)
+  const currentPrice = (hideDiscountInfo ? product.price : product.offerPrice) ?? product.price;
+  const oldPrice = (!hideDiscountInfo && product.offerPrice) ? product.price : product.originalPrice;
+
+  const discount = oldPrice && currentPrice < oldPrice && !hideDiscountInfo
+    ? Math.round((1 - currentPrice / oldPrice) * 100)
     : 0;
 
   return (
@@ -53,14 +57,24 @@ export function ProductCard({ product, className }: ProductCardProps) {
           
           {/* Badges */}
           <div className="absolute left-3 top-3 flex flex-col gap-2">
-            {product.isNew && (
+            {product.status === "upcoming" && (
+              <span className="rounded-full bg-blue-600 px-2.5 py-0.5 text-xs font-semibold text-white">
+                Coming Soon
+              </span>
+            )}
+            {product.isNew && product.status !== "upcoming" && (
               <span className="rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
                 New
               </span>
             )}
-            {discount > 0 && (
+            {discount > 0 && !hideDiscountInfo && (
               <span className="rounded-full bg-red-600 px-2.5 py-0.5 text-xs font-semibold text-white">
                 -{discount}%
+              </span>
+            )}
+            {product.discountExpiryDate && !hideDiscountInfo && (
+              <span className="rounded-full bg-orange-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">
+                Ends {new Date(product.discountExpiryDate).toLocaleDateString()}
               </span>
             )}
           </div>
@@ -77,13 +91,21 @@ export function ProductCard({ product, className }: ProductCardProps) {
             <Heart className={cn("h-5 w-5", inWatchlist && "fill-red-500 text-red-500 transition-colors")} />
             <span className="sr-only">{inWatchlist ? "Remove from Wishlist" : "Add to Wishlist"}</span>
           </Button>
-          <Button 
-            onClick={() => addItem(product, product.variants?.[0] || undefined)}
-            className="w-full h-10 bg-background/90 text-foreground backdrop-blur hover:bg-foreground hover:text-background rounded-full transition-colors"
-          >
-            <ShoppingBag className="h-4 w-4 mr-2" />
-            Add to Cart
-          </Button>
+          {product.status === "upcoming" ? (
+            <Button 
+              className="w-full h-10 bg-muted/90 text-muted-foreground backdrop-blur rounded-full cursor-not-allowed"
+            >
+              Coming Soon
+            </Button>
+          ) : (
+            <Button 
+              onClick={() => addItem(product, product.variants?.[0] || undefined)}
+              className="w-full h-10 bg-background/90 text-foreground backdrop-blur hover:bg-foreground hover:text-background rounded-full transition-colors"
+            >
+              <ShoppingBag className="h-4 w-4 mr-2" />
+              Add to Cart
+            </Button>
+          )}
         </div>
       </div>
 
@@ -102,10 +124,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
           {product.name}
         </Link>
         <div className="flex items-center gap-2">
-          <span className="font-semibold">৳{product.price.toFixed(2)}</span>
-          {product.originalPrice && (
+          <span className="font-semibold">৳{currentPrice.toFixed(2)}</span>
+          {oldPrice && oldPrice > currentPrice && (
             <span className="text-sm text-muted-foreground line-through">
-              ৳{product.originalPrice.toFixed(2)}
+              ৳{oldPrice.toFixed(2)}
             </span>
           )}
         </div>

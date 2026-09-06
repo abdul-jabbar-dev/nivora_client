@@ -2,16 +2,20 @@ import { Hero } from "@/components/hero/Hero";
 import { ShopByCategory } from "@/components/categories/ShopByCategory";
 import { TrendingProducts } from "@/components/products/TrendingProducts";
 import { EditorialShowcase } from "@/components/marketing/EditorialShowcase";
-import { DealsBanner } from "@/components/marketing/DealsBanner";
+// import { DealsBanner } from "@/components/marketing/DealsBanner";
 import { NewArrivals } from "@/components/products/NewArrivals";
+import { SpecialOffers } from "@/components/products/SpecialOffers";
+import { UpcomingProducts } from "@/components/products/UpcomingProducts";
 import { CustomerReviews } from "@/components/reviews/CustomerReviews";
 import { Newsletter } from "@/components/marketing/Newsletter";
+import { RequestProductBanner } from "@/components/marketing/RequestProductBanner";
 
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <Hero />
       <NewArrivals />
+      <UpcomingProducts />
       
       {/* Value Proposition Strip */}
       <section className="border-y border-border bg-muted/30 py-8">
@@ -39,8 +43,10 @@ export default function Home() {
 
       <ShopByCategory />
       <TrendingProducts />
+      <SpecialOffers />
       <EditorialShowcase />
-      <DealsBanner />
+      {/* <DealsBanner /> */}
+      <RequestProductBanner />
       <CustomerReviews />
       <Newsletter />
     </div>

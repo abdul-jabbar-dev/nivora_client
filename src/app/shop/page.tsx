@@ -17,11 +17,15 @@ interface PageProps {
     category?: string;
     sort?: string;
     page?: string;
+    q?: string;
+    minPrice?: string;
+    maxPrice?: string;
+    minRating?: string;
   }>;
 }
 
 export default async function ShopPage({ searchParams }: PageProps) {
-  const { category, sort, page: pageStr } = await searchParams;
+  const { category, sort, page: pageStr, q, minPrice, maxPrice, minRating } = await searchParams;
   
   const page = pageStr ? parseInt(pageStr, 10) : 1;
   const limit = 8;
@@ -31,6 +35,10 @@ export default async function ShopPage({ searchParams }: PageProps) {
     sort,
     page,
     limit,
+    q,
+    minPrice: minPrice ? Number(minPrice) : undefined,
+    maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    minRating: minRating ? Number(minRating) : undefined,
   });
 
   const categories = [
@@ -62,7 +70,14 @@ export default async function ShopPage({ searchParams }: PageProps) {
 
       <Container className="py-12 flex flex-col lg:flex-row gap-12">
         {/* Filters Sidebar */}
-        <ProductFilters categories={categories} initialCategory={category} />
+        <ProductFilters 
+          categories={categories} 
+          initialCategory={category} 
+          initialQ={q}
+          initialMinPrice={minPrice}
+          initialMaxPrice={maxPrice}
+          initialMinRating={minRating}
+        />
 
         {/* Product Grid Area */}
         <div className="flex-1 flex flex-col">
@@ -77,7 +92,7 @@ export default async function ShopPage({ searchParams }: PageProps) {
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
                 {products.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product} hideDiscountInfo={true} />
                 ))}
               </div>
               <Pagination currentPage={page} totalPages={totalPages} />

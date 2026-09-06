@@ -6,15 +6,14 @@ import { getProducts } from "@/services/productService";
 import { Container } from "@/components/ui/Container";
 import { ProductCard } from "@/components/products/ProductCard";
 import { Button } from "@/components/ui/Button";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { ChevronLeft, ChevronRight, CalendarClock } from "lucide-react";
 
-export function NewArrivals() {
+export function UpcomingProducts() {
   const scrollRef = useRef<HTMLDivElement>(null);
   
   const { data, isLoading } = useQuery({
-    queryKey: ["newArrivals"],
-    queryFn: () => getProducts({ filter: 'new', limit: 8 }),
+    queryKey: ["upcomingProducts"],
+    queryFn: () => getProducts({ filter: 'upcoming', limit: 8 }),
   });
   const products = data?.products;
 
@@ -25,27 +24,30 @@ export function NewArrivals() {
     }
   };
 
+  // If there are no upcoming products, hide this section
+  if (!isLoading && (!products || products.length === 0)) {
+    return null;
+  }
+
   return (
-    <section className="py-24 overflow-hidden">
+    <section className="py-24 bg-blue-50/30 overflow-hidden">
       <Container>
         <div className="flex items-end justify-between mb-12">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-              New Arrivals
+            <div className="flex items-center gap-2 mb-2 text-blue-600">
+              <CalendarClock className="w-5 h-5" />
+              <span className="font-bold text-sm tracking-widest uppercase">Dropping Soon</span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+              Upcoming Releases
             </h2>
-            <Link
-              href="/new-arrivals"
-              className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
-            >
-              See All <ArrowRight className="w-4 h-4" />
-            </Link>
           </div>
           
           <div className="hidden md:flex gap-2">
-            <Button variant="outline" size="icon" onClick={() => scroll("left")} className="rounded-full">
+            <Button variant="outline" size="icon" onClick={() => scroll("left")} className="rounded-full bg-background">
               <ChevronLeft className="w-5 h-5" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => scroll("right")} className="rounded-full">
+            <Button variant="outline" size="icon" onClick={() => scroll("right")} className="rounded-full bg-background">
               <ChevronRight className="w-5 h-5" />
             </Button>
           </div>

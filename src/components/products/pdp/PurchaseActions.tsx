@@ -35,7 +35,7 @@ export function PurchaseActions({ product }: PurchaseActionsProps) {
     setTimeout(() => setIsAdded(false), 2000);
   };
 
-  if (inventory === 0) {
+  if (inventory === 0 && product.status !== "upcoming") {
     return (
       <div className="flex flex-col gap-4 mt-6">
         <div className="flex items-center gap-2 text-red-600 font-medium">
@@ -52,23 +52,27 @@ export function PurchaseActions({ product }: PurchaseActionsProps) {
     );
   }
 
+  const isUpcoming = product.status === "upcoming";
+
   return (
     <div className="flex flex-col gap-6 mt-6 border-b border-border pb-8">
       {/* Stock Status */}
-      <div className="flex items-center gap-2 text-green-600 dark:text-green-500 font-medium text-sm">
-        <span className="relative flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-        </span>
-        {inventory < 10 ? `Only ${inventory} left in stock` : "In Stock"}
-      </div>
+      {!isUpcoming && (
+        <div className="flex items-center gap-2 text-green-600 dark:text-green-500 font-medium text-sm">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+          </span>
+          {inventory < 10 ? `Only ${inventory} left in stock` : "In Stock"}
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-4">
         {/* Quantity Selector */}
         <div className="flex items-center border border-border rounded-lg h-14 w-full sm:w-32 bg-background shrink-0">
           <button
             onClick={handleDecrease}
-            disabled={quantity <= 1}
+            disabled={quantity <= 1 || isUpcoming}
             className="w-10 h-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
             aria-label="Decrease quantity"
           >
@@ -79,7 +83,7 @@ export function PurchaseActions({ product }: PurchaseActionsProps) {
           </div>
           <button
             onClick={handleIncrease}
-            disabled={quantity >= inventory}
+            disabled={quantity >= inventory || isUpcoming}
             className="w-10 h-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-50 transition-colors"
             aria-label="Increase quantity"
           >
@@ -91,13 +95,17 @@ export function PurchaseActions({ product }: PurchaseActionsProps) {
         <div className="flex-1 flex flex-col sm:flex-row gap-3">
           <Button
             onClick={handleAddToCart}
-            disabled={isAdding || isAdded}
+            disabled={isAdding || isAdded || isUpcoming}
             size="lg"
             className={`flex-1 h-14 text-base transition-all duration-300 ${
-              isAdded ? "bg-green-600 hover:bg-green-700 text-white" : ""
+              isAdded && !isUpcoming ? "bg-green-600 hover:bg-green-700 text-white" : ""
             }`}
           >
-            {isAdding ? (
+            {isUpcoming ? (
+              <span className="flex items-center gap-2">
+                Coming Soon
+              </span>
+            ) : isAdding ? (
               <span className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-background/30 border-t-background rounded-full animate-spin" />
                 Adding...
@@ -117,9 +125,10 @@ export function PurchaseActions({ product }: PurchaseActionsProps) {
           <Button
             variant="outline"
             size="lg"
+            disabled={isUpcoming}
             className="flex-1 sm:flex-none sm:w-32 h-14 text-base"
           >
-            Buy Now
+            {isUpcoming ? "Soon" : "Buy Now"}
           </Button>
         </div>
       </div>

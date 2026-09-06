@@ -5,6 +5,22 @@ import { revalidatePath } from "next/cache";
 const API_URL = "http://localhost:3005";
 const ADMIN_SECRET = "admin_secret_12345";
 
+export async function getProductWithAnalytics(id: string) {
+  const response = await fetch(`${API_URL}/products/${id}/analytics`, {
+    headers: {
+      "x-admin-secret": ADMIN_SECRET,
+    },
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to fetch product analytics");
+  }
+
+  return response.json();
+}
+
 export async function createCategory(data: { name: string; slug: string; imageUrl?: string|null; parentId?: string|null }) {
   const response = await fetch(`${API_URL}/products/categories`, {
     method: "POST",

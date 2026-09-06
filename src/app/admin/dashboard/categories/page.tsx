@@ -10,6 +10,7 @@ interface Category {
   slug: string;
   imageUrl: string | null;
   parentId: string | null;
+  showNav: boolean;
 }
 
 export default function CategoriesAdminPage() {
@@ -47,13 +48,15 @@ export default function CategoriesAdminPage() {
     const slug = formData.get("slug") as string;
     const imageUrl = formData.get("imageUrl") as string;
     const parentId = formData.get("parentId") as string;
+    const showNav = formData.get("showNav") === "on";
 
     try {
       await createCategory({ 
         name, 
         slug, 
         imageUrl: imageUrl || null,
-        parentId: parentId || null
+        parentId: parentId || null,
+        showNav
       });
       setSuccess(true);
       (e.target as HTMLFormElement).reset();
@@ -65,6 +68,19 @@ export default function CategoriesAdminPage() {
     }
   }
 
+  const toggleShowNav = async (id: string, currentVal: boolean) => {
+    try {
+      await fetch(`http://localhost:3005/products/categories/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-admin-secret": "admin_secret_12345" },
+        body: JSON.stringify({ showNav: !currentVal })
+      });
+      fetchCategories();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   // Build tree for UI
   const renderCategoryTree = (parentId: string | null, level = 0) => {
     const children = categories.filter(c => c.parentId === parentId);
@@ -74,13 +90,29 @@ export default function CategoriesAdminPage() {
       <ul className={level > 0 ? "pl-6 mt-2 space-y-2 border-l-2 border-muted" : "space-y-4"}>
         {children.map(child => (
           <li key={child.id}>
-            <div className="flex items-center gap-3 bg-card p-3 rounded-lg border border-border shadow-sm">
-              {child.imageUrl && (
-                <img src={child.imageUrl} alt={child.name} className="w-10 h-10 rounded-md object-cover" />
-              )}
-              <div>
-                <p className="font-medium">{child.name}</p>
-                <p className="text-xs text-muted-foreground">/{child.slug}</p>
+            <div className="flex items-center justify-between bg-card p-3 rounded-lg border border-border shadow-sm">
+              <div className="flex items-center gap-3">
+                {child.imageUrl && (
+                  <img src={child.imageUrl} alt={child.name} className="w-10 h-10 rounded-md object-cover" />
+                )}
+                <div>
+                  <p className="font-medium flex items-center gap-2">
+                    {child.name}
+                    {child.showNav && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">Nav</span>}
+                  </p>
+                  <p className="text-xs text-muted-foreground">/{child.slug}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-medium text-muted-foreground flex items-center gap-2 cursor-pointer">
+                  Show in Nav
+                  <input 
+                    type="checkbox" 
+                    checked={child.showNav} 
+                    onChange={() => toggleShowNav(child.id, child.showNav)}
+                    className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+                  />
+                </label>
               </div>
             </div>
             {renderCategoryTree(child.id, level + 1)}
@@ -141,6 +173,17 @@ export default function CategoriesAdminPage() {
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))}
               </select>
+            </div>
+            <div className="flex items-center gap-2 py-2">
+              <input 
+                type="checkbox" 
+                id="showNav" 
+                name="showNav"
+                className="w-4 h-4 rounded border-border text-primary focus:ring-primary"
+              />
+              <label htmlFor="showNav" className="text-sm font-medium cursor-pointer">
+                Show in Navigation
+              </label>
             </div>
 
             {error && <p className="text-sm font-medium text-red-600 bg-red-50 p-3 rounded-lg">{error}</p>}

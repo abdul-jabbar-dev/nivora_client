@@ -1,7 +1,7 @@
 "use client";
 
 import { Container } from "@/components/ui/Container";
-import { LogOut, LayoutDashboard, Users, ShoppingCart, Settings, Package, Tag } from "lucide-react";
+import { LogOut, LayoutDashboard, Users, ShoppingCart, Settings, Package, Tag, FileText } from "lucide-react";
 import { logoutAdmin } from "../actions";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,6 +16,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
     { name: "Products", href: "/admin/dashboard/products", icon: Package },
     { name: "Orders", href: "/admin/dashboard/orders", icon: ShoppingCart },
     { name: "Customers", href: "/admin/dashboard/customers", icon: Users },
+    { name: "Requests", href: "/admin/dashboard/requests", icon: FileText },
   ];
 
   return (
