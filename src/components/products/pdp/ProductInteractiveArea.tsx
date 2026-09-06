@@ -7,6 +7,7 @@ import { VariantSelector } from "./VariantSelector";
 import { PurchaseActions } from "./PurchaseActions";
 import { TrustFeatures } from "./TrustFeatures";
 import { ProductDetails } from "./ProductDetails";
+import { ProductInteractions } from "./ProductInteractions";
 import { Product } from "@/types/product";
 
 interface ProductInteractiveAreaProps {
@@ -80,6 +81,7 @@ export function ProductInteractiveArea({ product }: ProductInteractiveAreaProps)
         )}
 
         <PurchaseActions product={product} />
+        <ProductInteractions product={product} />
         <TrustFeatures />
         <ProductDetails
           description={product.description}

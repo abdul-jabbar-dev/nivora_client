@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { createProduct } from "../../actions";
 import { Button } from "@/components/ui/Button";
+import { ENV } from "@/lib/env";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import "react-quill-new/dist/quill.snow.css";
@@ -48,7 +49,7 @@ function ProductsAdminPageContent() {
 
   useEffect(() => {
     // Fetch categories from the public endpoint for the dropdown
-    fetch("http://localhost:3005/products/categories")
+    fetch(`${ENV.NEXT_PUBLIC_API_URL}/products/categories`)
       .then(res => res.json())
       .then(data => setCategories(data))
       .catch(err => console.error("Failed to fetch categories", err));
@@ -131,7 +132,7 @@ function ProductsAdminPageContent() {
       selectedFiles.forEach(file => uploadFormData.append('files', file));
       uploadFormData.append('folder', 'product');
       
-      const uploadRes = await fetch("http://localhost:3005/upload", {
+      const uploadRes = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/upload`, {
         method: "POST",
         body: uploadFormData,
       });
@@ -163,7 +164,7 @@ function ProductsAdminPageContent() {
              const vForm = new FormData();
              vForm.append("files", opt.imageFile);
              vForm.append("folder", "product");
-             const vRes = await fetch("http://localhost:3005/upload", { method: "POST", body: vForm });
+             const vRes = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/upload`, { method: "POST", body: vForm });
              if (vRes.ok) {
                const vData = await vRes.json();
                imageUrl = vData.urls[0];

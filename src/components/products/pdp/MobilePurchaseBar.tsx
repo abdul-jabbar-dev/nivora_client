@@ -34,7 +34,7 @@ export function MobilePurchaseBar({ product }: MobilePurchaseBarProps) {
       <div className="flex items-center justify-between gap-4 max-w-lg mx-auto">
         <div className="flex flex-col">
           <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Total</span>
-          <span className="text-xl font-bold">৳{product.price.toFixed(2)}</span>
+          <span className="text-xl font-bold">৳{(product.offerPrice ?? product.price).toFixed(2)}</span>
         </div>
         <Button 
           onClick={() => addItem(product, product.variants?.[0] || undefined)}

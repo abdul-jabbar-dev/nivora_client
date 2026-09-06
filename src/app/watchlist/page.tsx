@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/products/ProductCard";
 import { ProductCardSkeleton } from "@/components/products/ProductCardSkeleton";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { Heart, ShoppingBag } from "lucide-react";
+import { Bookmark, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useWatchlistStore } from "@/store/useWatchlistStore";
 import { useCartStore } from "@/store/useCartStore";
@@ -84,7 +84,7 @@ export default function WatchlistPage() {
         ) : (
           <div className="flex flex-col items-center justify-center py-24 text-center bg-muted/30 rounded-2xl border border-border">
             <div className="w-20 h-20 bg-background rounded-full flex items-center justify-center mb-6 shadow-sm">
-              <Heart className="w-10 h-10 text-muted-foreground" />
+              <Bookmark className="w-10 h-10 text-muted-foreground" />
             </div>
             <h3 className="text-2xl font-bold mb-2">Your watchlist is empty</h3>
             <p className="text-muted-foreground mb-8 max-w-md mx-auto">

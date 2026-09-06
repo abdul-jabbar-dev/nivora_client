@@ -6,6 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CartSidebar } from "@/components/cart/CartSidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
+import { ENV } from "@/lib/env";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -22,7 +23,7 @@ export default async function RootLayout({
   let navCategories = [];
   let allCategories = [];
   try {
-    const res = await fetch("http://localhost:3005/products/categories", {
+    const res = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/products/categories`, {
       next: { revalidate: 60 } // cache for 60s
     });
     if (res.ok) {

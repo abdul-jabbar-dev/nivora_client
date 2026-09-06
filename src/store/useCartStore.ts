@@ -2,8 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Product, ProductVariant } from "@/types/product";
 import { useAuthStore } from "./useAuthStore";
+import { ENV } from "@/lib/env";
 
-const API_URL = "http://localhost:3005";
+const API_URL = ENV.NEXT_PUBLIC_API_URL;
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const token = (useAuthStore.getState().session as any)?.access_token;
@@ -17,7 +18,10 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
       Authorization: `Bearer ${token}`,
     },
   }).then(async r => {
-    if (!r.ok) throw await r.json();
+    if (!r.ok) {
+      const err = await r.json();
+      throw new Error(err.message || JSON.stringify(err));
+    }
     return r.json();
   });
 };
@@ -122,7 +126,7 @@ export const useCartStore = create<CartStore>()(
       
       getCartTotal: () => {
         const { items } = get();
-        return items.reduce((total, item) => total + item.product.price * item.quantity, 0);
+        return items.reduce((total, item) => total + (item.product.offerPrice ?? item.product.price) * item.quantity, 0);
       },
       
       getCartCount: () => {

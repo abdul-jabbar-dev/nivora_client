@@ -2,8 +2,9 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { Product } from "@/types/product";
 import { useAuthStore } from "./useAuthStore";
+import { ENV } from "@/lib/env";
 
-const API_URL = "http://localhost:3005";
+const API_URL = ENV.NEXT_PUBLIC_API_URL;
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const token = (useAuthStore.getState().session as any)?.access_token;

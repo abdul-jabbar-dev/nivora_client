@@ -17,7 +17,6 @@ const FOOTER_SECTIONS = [
     links: [
       { name: "Contact", href: "/contact" },
       { name: "Shipping", href: "/shipping" },
-      { name: "Returns", href: "/returns" },
       { name: "FAQ", href: "/faq" },
     ],
   },
@@ -82,9 +81,7 @@ export function Footer() {
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} NIVORA. All rights reserved.</p>
           <div className="flex gap-4 mt-4 md:mt-0">
-            <span>Visa</span>
-            <span>Mastercard</span>
-            <span>PayPal</span>
+           
           </div>
         </div>
       </Container>

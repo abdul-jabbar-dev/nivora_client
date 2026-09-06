@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { LeaveReviewModal } from "@/components/reviews/LeaveReviewModal";
 import { useCartStore } from "@/store/useCartStore";
 import { orderService } from "@/services/orderService";
+import { ProductInteractions } from "@/components/products/pdp/ProductInteractions";
 
 const StatusIcon = ({ status }: { status: string }) => {
   switch (status?.toLowerCase()) {
@@ -53,17 +54,24 @@ export default function OrderDetailsPage() {
 
   useEffect(() => {
     fetchOrder();
+    
+    // Poll for order updates to simulate real-time updates for admin status changes
+    const interval = setInterval(() => {
+      fetchOrder(false);
+    }, 5000);
+    
+    return () => clearInterval(interval);
   }, [id]);
 
-  const fetchOrder = async () => {
+  const fetchOrder = async (showLoading = true) => {
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const data = await orderService.getOrderDetails(id);
       setOrder(data);
     } catch (err: any) {
-      setError(err.message || "Failed to load order details");
+      if (showLoading) setError(err.message || "Failed to load order details");
     } finally {
-      setIsLoading(false);
+      if (showLoading) setIsLoading(false);
     }
   };
 
@@ -224,7 +232,8 @@ export default function OrderDetailsPage() {
                         </div>
                       </div>
                       {order.status === 'DELIVERED' && (
-                        <div className="mt-4 flex justify-end print:hidden">
+                        <div className="mt-4 flex flex-col sm:flex-row justify-end items-end sm:items-center gap-4 print:hidden">
+                          <ProductInteractions product={item.product} compact className="mt-0" />
                           <Button 
                             variant="outline" 
                             size="sm" 
@@ -256,14 +265,23 @@ export default function OrderDetailsPage() {
                   <p className="text-sm font-medium mb-1">{order.paymentMethod}</p>
                   
                   <div className="mt-4 space-y-2 text-sm border-t border-border pt-4">
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>Subtotal</span>
-                      <span>৳{(order.total - (order.total * 0.08)).toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>Taxes</span>
-                      <span>৳{(order.total * 0.08).toFixed(2)}</span>
-                    </div>
+                    {(() => {
+                      const subtotal = order.items?.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0) || 0;
+                      const shipping = order.total - subtotal;
+                      return (
+                        <>
+                          <div className="flex justify-between text-muted-foreground">
+                            <span>Subtotal</span>
+                            <span>৳{subtotal.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between text-muted-foreground">
+                            <span>Shipping</span>
+                            <span>৳{shipping.toFixed(2)}</span>
+                          </div>
+                        </>
+                      );
+                    })()}
+
                     <div className="flex justify-between font-bold text-base mt-2 pt-2 border-t border-border">
                       <span>Total</span>
                       <span>৳{order.total.toFixed(2)}</span>

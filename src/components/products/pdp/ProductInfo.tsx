@@ -78,11 +78,6 @@ export function ProductInfo({
             <span className="text-sm font-medium text-green-600 dark:text-green-500">
               You save ৳{discountAmount.toFixed(2)} ({Math.round((discountAmount / oldPrice!) * 100)}%)
             </span>
-            {discountExpiryDate && (
-              <span className="text-xs font-semibold text-orange-600 dark:text-orange-500 bg-orange-100 dark:bg-orange-900/30 px-2 py-1 rounded-md w-fit">
-                Offer ends on {new Date(discountExpiryDate).toLocaleDateString()}
-              </span>
-            )}
           </div>
         )}
       </div>

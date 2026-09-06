@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createCategory } from "../actions";
+import { createCategory, updateCategoryNav } from "../actions";
 import { Button } from "@/components/ui/Button";
+import { ENV } from "@/lib/env";
 
 interface Category {
   id: string;
@@ -23,7 +24,7 @@ export default function CategoriesAdminPage() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("http://localhost:3005/products/categories");
+      const res = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/products/categories`);
       const data = await res.json();
       setCategories(data);
     } catch (err) {
@@ -70,11 +71,7 @@ export default function CategoriesAdminPage() {
 
   const toggleShowNav = async (id: string, currentVal: boolean) => {
     try {
-      await fetch(`http://localhost:3005/products/categories/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", "x-admin-secret": "admin_secret_12345" },
-        body: JSON.stringify({ showNav: !currentVal })
-      });
+      await updateCategoryNav(id, !currentVal);
       fetchCategories();
     } catch (e) {
       console.error(e);

@@ -10,11 +10,12 @@ import { ChevronRight, ShieldCheck, CreditCard } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { ENV } from "@/lib/env";
 
 const api = {
-  get: async (url: string) => fetch(`http://localhost:3005${url}`, { headers: { Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` } }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); }),
-  post: async (url: string, data: any) => fetch(`http://localhost:3005${url}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` }, body: JSON.stringify(data) }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); }),
-  patch: async (url: string, data: any) => fetch(`http://localhost:3005${url}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` }, body: JSON.stringify(data) }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); })
+  get: async (url: string) => fetch(`${ENV.NEXT_PUBLIC_API_URL}${url}`, { headers: { Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` } }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); }),
+  post: async (url: string, data: any) => fetch(`${ENV.NEXT_PUBLIC_API_URL}${url}`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` }, body: JSON.stringify(data) }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); }),
+  patch: async (url: string, data: any) => fetch(`${ENV.NEXT_PUBLIC_API_URL}${url}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${(useAuthStore.getState().session as any)?.access_token}` }, body: JSON.stringify(data) }).then(async r => { if (!r.ok) throw await r.json(); return r.json().then(data => ({ data })); })
 };
 
 export default function CheckoutPage() {
@@ -85,8 +86,7 @@ export default function CheckoutPage() {
 
   const subtotal = getCartTotal();
   const shipping = shippingMethod === 'sameday' ? 70 : 130;
-  const taxes = subtotal * 0.08; // 8% dummy tax
-  const total = subtotal + shipping + taxes;
+  const total = subtotal + shipping;
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,7 +126,7 @@ export default function CheckoutPage() {
         items: items.map(item => ({
           productId: item.product.id,
           quantity: item.quantity,
-          price: item.product.price
+          price: item.product.offerPrice ?? item.product.price
         }))
       };
       
@@ -409,7 +409,7 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   <div className="font-medium text-sm flex items-center">
-                    ৳{(item.product.price * item.quantity).toFixed(2)}
+                    ৳{((item.product.offerPrice ?? item.product.price) * item.quantity).toFixed(2)}
                   </div>
                 </div>
               ))}
@@ -424,11 +424,7 @@ export default function CheckoutPage() {
                 <span className="text-muted-foreground">Shipping (Steadfast)</span>
                 <span className="font-medium">${shipping.toFixed(2)}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Taxes</span>
-                <span className="font-medium">৳{taxes.toFixed(2)}</span>
               </div>
-            </div>
 
             <div className="flex items-center justify-between pt-6 mt-6 border-t border-border">
               <span className="text-lg font-bold">Total</span>

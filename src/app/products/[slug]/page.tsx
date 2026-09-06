@@ -85,7 +85,7 @@ export default async function ProductPage({ params }: PageProps) {
       "@type": "Offer",
       url: `https://example.com/products/${product.slug}`,
       priceCurrency: "USD",
-      price: product.price,
+      price: product.offerPrice ?? product.price,
       itemCondition: "https://schema.org/NewCondition",
       availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     },

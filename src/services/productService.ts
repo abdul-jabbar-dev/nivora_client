@@ -1,6 +1,7 @@
 import { Product, Category } from "../types/product";
+import { ENV } from "@/lib/env";
 
-const API_URL = 'http://localhost:3005';
+const API_URL = ENV.NEXT_PUBLIC_API_URL;
 
 export async function getTrendingProducts(): Promise<Product[]> {
   const response = await fetch(`${API_URL}/products/trending`, { next: { revalidate: 3600 } });

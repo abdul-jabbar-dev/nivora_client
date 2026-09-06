@@ -7,6 +7,7 @@ import { Upload, X, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { useAuthStore } from "@/store/useAuthStore";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
+import { ENV } from "@/lib/env";
 
 export default function RequestProductPage() {
   const { user } = useAuthStore();
@@ -70,7 +71,7 @@ export default function RequestProductPage() {
         selectedFiles.forEach((file) => formData.append("files", file));
         formData.append("folder", "requests");
 
-        const uploadRes = await fetch("http://localhost:3005/upload", {
+        const uploadRes = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/upload`, {
           method: "POST",
           body: formData,
         });
@@ -96,7 +97,7 @@ export default function RequestProductPage() {
         userId: user?.id || null,
       };
 
-      const res = await fetch("http://localhost:3005/product-requests", {
+      const res = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/product-requests`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

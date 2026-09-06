@@ -21,6 +21,12 @@ export interface Product {
     estimatedDays: string;
     cost: number;
   };
+  offerPrice?: number | null;
+  discountExpiryDate?: string | null;
+  status?: string;
+  expectedArrivalDate?: string | null;
+  likesCount?: number;
+  dislikesCount?: number;
 }
 
 export interface ProductVariantOption {

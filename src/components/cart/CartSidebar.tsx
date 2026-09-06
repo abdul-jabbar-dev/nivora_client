@@ -126,7 +126,7 @@ export function CartSidebar() {
                         <Plus className="w-3 h-3" />
                       </button>
                     </div>
-                    <p className="font-semibold">৳{(item.product.price * item.quantity).toFixed(2)}</p>
+                    <p className="font-semibold">৳{((item.product.offerPrice ?? item.product.price) * item.quantity).toFixed(2)}</p>
                   </div>
                 </div>
               </div>
@@ -141,7 +141,7 @@ export function CartSidebar() {
               <span className="text-xl font-bold">৳{getCartTotal().toFixed(2)}</span>
             </div>
             <p className="text-sm text-muted-foreground mb-6">
-              Shipping and taxes calculated at checkout.
+              Shipping calculated at checkout.
             </p>
             <Link href="/checkout" onClick={closeCart} className="w-full">
               <Button size="lg" className="w-full text-base h-14">

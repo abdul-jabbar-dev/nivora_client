@@ -1,20 +1,48 @@
+"use server";
 
-const API_URL = 'http://localhost:3005';
-const ADMIN_SECRET = 'admin_secret_12345'; // Matching the backend AdminKeyGuard
+import { cookies } from "next/headers";
+import { createServerClient } from "@supabase/ssr";
+import { ENV } from "@/lib/env";
+
+const API_URL = ENV.NEXT_PUBLIC_API_URL;
+
+async function getAuthHeaders() {
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+      },
+    }
+  );
+  const { data: { session } } = await supabase.auth.getSession();
+  return {
+    "Authorization": `Bearer ${session?.access_token}`,
+  };
+}
 
 const fetchWithAdminKey = async (url: string, options: RequestInit = {}) => {
+  const headers = await getAuthHeaders();
   return fetch(`${API_URL}${url}`, {
     ...options,
     headers: {
       ...options.headers,
-      'x-admin-secret': ADMIN_SECRET,
+      ...headers,
       'Content-Type': 'application/json'
     }
   });
 };
 
-export async function getAllAdminOrders(page = 1, limit = 20) {
-  const response = await fetchWithAdminKey(`/orders/admin/all?page=${page}&limit=${limit}`);
+export async function getAllAdminOrders(page = 1, limit = 20, status?: string) {
+  let url = `/orders/admin/all?page=${page}&limit=${limit}`;
+  if (status) {
+    url += `&status=${status}`;
+  }
+  const response = await fetchWithAdminKey(url);
   if (!response.ok) throw new Error('Failed to fetch admin orders');
   return response.json();
 }

@@ -46,8 +46,7 @@ export async function middleware(request: NextRequest) {
 
   // Admin dashboard protection
   if (request.nextUrl.pathname.startsWith('/admin/dashboard')) {
-    const adminSession = request.cookies.get('admin_session')
-    if (!adminSession || adminSession.value !== 'true') {
+    if (!user) {
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
       return NextResponse.redirect(url)

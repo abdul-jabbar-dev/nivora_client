@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, ShoppingBag, Star } from "lucide-react";
+import { Bookmark, ShoppingBag, Star } from "lucide-react";
 import { Product } from "@/types/product";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -72,11 +72,6 @@ export function ProductCard({ product, className, hideDiscountInfo = false }: Pr
                 -{discount}%
               </span>
             )}
-            {product.discountExpiryDate && !hideDiscountInfo && (
-              <span className="rounded-full bg-orange-500 px-2.5 py-0.5 text-[10px] font-semibold text-white">
-                Ends {new Date(product.discountExpiryDate).toLocaleDateString()}
-              </span>
-            )}
           </div>
         </Link>
 
@@ -88,7 +83,7 @@ export function ProductCard({ product, className, hideDiscountInfo = false }: Pr
             className="h-10 w-10 bg-background/90 backdrop-blur shrink-0 rounded-full"
             onClick={handleWatchlistClick}
           >
-            <Heart className={cn("h-5 w-5", inWatchlist && "fill-red-500 text-red-500 transition-colors")} />
+            <Bookmark className={cn("h-5 w-5", inWatchlist && "fill-primary text-primary transition-colors")} />
             <span className="sr-only">{inWatchlist ? "Remove from Wishlist" : "Add to Wishlist"}</span>
           </Button>
           {product.status === "upcoming" ? (

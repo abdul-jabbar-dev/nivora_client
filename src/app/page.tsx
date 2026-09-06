@@ -6,7 +6,7 @@ import { EditorialShowcase } from "@/components/marketing/EditorialShowcase";
 import { NewArrivals } from "@/components/products/NewArrivals";
 import { SpecialOffers } from "@/components/products/SpecialOffers";
 import { UpcomingProducts } from "@/components/products/UpcomingProducts";
-import { CustomerReviews } from "@/components/reviews/CustomerReviews";
+
 import { Newsletter } from "@/components/marketing/Newsletter";
 import { RequestProductBanner } from "@/components/marketing/RequestProductBanner";
 
@@ -30,8 +30,8 @@ export default function Home() {
               Secure Checkout
             </div>
             <div className="flex flex-col items-center gap-2">
-              <span className="text-2xl">🔄</span>
-              30-Day Easy Returns
+              <span className="text-2xl">✅</span>
+              Checked & Verified
             </div>
             <div className="flex flex-col items-center gap-2">
               <span className="text-2xl">💬</span>
@@ -47,7 +47,7 @@ export default function Home() {
       <EditorialShowcase />
       {/* <DealsBanner /> */}
       <RequestProductBanner />
-      <CustomerReviews />
+
       <Newsletter />
     </div>
   );

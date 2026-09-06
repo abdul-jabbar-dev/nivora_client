@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Pagination } from "@/components/ui/Pagination";
 import { Plus, Edit, Trash2, Search, Package, MoreVertical, X } from "lucide-react";
 import Image from "next/image";
+import { ENV } from "@/lib/env";
 
 interface Product {
   id: string;
@@ -64,7 +65,7 @@ function ProductsListContent() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const url = new URL("http://localhost:3005/products");
+      const url = new URL(`${ENV.NEXT_PUBLIC_API_URL}/products`);
       url.searchParams.set("limit", "10");
       url.searchParams.set("page", currentPage.toString());
       if (activeTab !== "all") {

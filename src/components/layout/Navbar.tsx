@@ -4,7 +4,7 @@ import * as React from "react";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, ShoppingBag, User, Package, Heart, LogOut } from "lucide-react";
+import { Search, ShoppingBag, User, Package, Bookmark, LogOut, Menu, X, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Container } from "@/components/ui/Container";
 import { useCartStore } from "@/store/useCartStore";
@@ -24,6 +24,7 @@ export function Navbar({ navCategories = [], allCategories = [] }: { navCategori
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Megamenu state
   const [isMegamenuOpen, setIsMegamenuOpen] = useState(false);
@@ -73,12 +74,18 @@ export function Navbar({ navCategories = [], allCategories = [] }: { navCategori
       )}
     >
       <div className="bg-primary text-primary-foreground text-xs font-medium py-1.5 text-center">
-        Free shipping on orders over ৳5000 • Easy 30-day returns
+        Free shipping on orders over ৳5000  
       </div>
       
       <Container>
         <div className="flex h-16 items-center justify-between">
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-4 md:gap-8">
+            <button 
+              className="md:hidden p-2 -ml-2 text-foreground/80 hover:text-foreground"
+              onClick={() => setIsMobileMenuOpen(true)}
+            >
+              <Menu className="w-5 h-5" />
+            </button>
             <Link href="/" className="flex items-center text-foreground hover:opacity-90 transition-opacity">
               <svg width="140" height="36" viewBox="0 0 140 36" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect x="1.5" y="1.5" width="132" height="33" stroke="currentColor" strokeWidth="2" />
@@ -190,6 +197,13 @@ export function Navbar({ navCategories = [], allCategories = [] }: { navCategori
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-foreground transition-all group-hover:w-full" />
                 </Link>
               ))}
+              <Link
+                href="/request-product"
+                className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors relative group"
+              >
+                Request Product
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-foreground transition-all group-hover:w-full" />
+              </Link>
             </nav>
           </div>
 
@@ -225,7 +239,10 @@ export function Navbar({ navCategories = [], allCategories = [] }: { navCategori
                             <Package className="w-4 h-4 text-muted-foreground" /> My Orders
                           </Link>
                           <Link href="/watchlist" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
-                            <Heart className="w-4 h-4 text-muted-foreground" /> My Watchlist
+                            <Bookmark className="w-4 h-4 text-muted-foreground" /> My Watchlist
+                          </Link>
+                          <Link href="/requests" onClick={() => setIsProfileOpen(false)} className="flex items-center gap-3 px-3 py-2 text-sm rounded-md hover:bg-muted transition-colors">
+                            <FileText className="w-4 h-4 text-muted-foreground" /> My Requests
                           </Link>
                           <button 
                             onClick={() => { openCart(); setIsProfileOpen(false); }} 
@@ -251,6 +268,9 @@ export function Navbar({ navCategories = [], allCategories = [] }: { navCategori
                 </Link>
               )}
             </div>
+          </div>
+          
+          <div className="flex items-center md:hidden">
             <button 
               onClick={openCart}
               className="p-2 text-foreground/80 hover:text-foreground transition-colors relative"
@@ -265,6 +285,92 @@ export function Navbar({ navCategories = [], allCategories = [] }: { navCategori
           </div>
         </div>
       </Container>
+
+      {/* Mobile Menu Drawer */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] md:hidden"
+            />
+            <motion.div
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 left-0 bottom-0 w-3/4 max-w-sm bg-background border-r border-border z-[110] flex flex-col md:hidden"
+            >
+              <div className="p-4 border-b border-border flex items-center justify-between">
+                <span className="font-bold tracking-widest">NIVORΛ</span>
+                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 -mr-2 text-muted-foreground hover:text-foreground">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="flex-1 overflow-y-auto py-4">
+                <div className="px-4 pb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Categories</div>
+                <div className="flex flex-col mb-6">
+                  {allCategories.filter(c => !c.parentId).map(parent => (
+                    <Link 
+                      key={parent.id} 
+                      href={`/shop?category=${parent.slug}`}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="px-4 py-3 text-sm font-medium border-b border-border/50 hover:bg-muted"
+                    >
+                      {parent.name}
+                    </Link>
+                  ))}
+                  <Link 
+                    href="/shop"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-3 text-sm font-medium border-b border-border/50 hover:bg-muted text-primary"
+                  >
+                    View All Products
+                  </Link>
+                  <Link 
+                    href="/request-product"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-3 text-sm font-medium border-b border-border/50 hover:bg-muted text-primary"
+                  >
+                    Request a Product
+                  </Link>
+                </div>
+
+                <div className="px-4 pb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Account</div>
+                <div className="flex flex-col">
+                  {user ? (
+                    <>
+                      <Link href="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+                        <User className="w-4 h-4" /> My Profile
+                      </Link>
+                      <Link href="/orders" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+                        <Package className="w-4 h-4" /> My Orders
+                      </Link>
+                      <Link href="/watchlist" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+                        <Bookmark className="w-4 h-4" /> My Watchlist
+                      </Link>
+                      <Link href="/requests" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+                        <FileText className="w-4 h-4" /> My Requests
+                      </Link>
+                      <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-3 text-sm text-red-600 hover:bg-red-50 text-left w-full border-t border-border mt-2">
+                        <LogOut className="w-4 h-4" /> Logout
+                      </button>
+                    </>
+                  ) : (
+                    <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-muted">
+                      <User className="w-4 h-4" /> Sign In / Register
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

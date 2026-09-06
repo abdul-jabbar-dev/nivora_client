@@ -8,15 +8,16 @@ import Link from "next/link";
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState('');
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [statusFilter]);
 
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
-      const data = await getAllAdminOrders(1, 50);
+      const data = await getAllAdminOrders(1, 50, statusFilter);
       setOrders(data.orders);
     } catch (err) {
       console.error("Failed to fetch orders", err);
@@ -46,9 +47,27 @@ export default function AdminOrdersPage() {
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Order Management</h1>
-        <p className="text-muted-foreground">View and manage all customer orders.</p>
+      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight mb-2">Order Management</h1>
+          <p className="text-muted-foreground">View and manage all customer orders.</p>
+        </div>
+        
+        <div className="flex items-center gap-2 bg-background border border-border px-3 py-2 rounded-lg shadow-sm">
+          <span className="text-sm font-medium text-muted-foreground whitespace-nowrap">Filter by Status:</span>
+          <select 
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-transparent border-none text-sm font-medium focus:ring-0 cursor-pointer outline-none w-32"
+          >
+            <option value="">All Orders</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
       </div>
 
       <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden">

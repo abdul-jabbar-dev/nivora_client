@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
 import { updateProduct } from "../../../actions";
 import { Button } from "@/components/ui/Button";
+import { ENV } from "@/lib/env";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import "react-quill-new/dist/quill.snow.css";
@@ -52,14 +53,14 @@ export default function EditProductPage() {
 
   useEffect(() => {
     // Fetch categories
-    fetch("http://localhost:3005/products/categories")
+    fetch(`${ENV.NEXT_PUBLIC_API_URL}/products/categories`)
       .then(res => res.json())
       .then(data => setCategories(data))
       .catch(err => console.error("Failed to fetch categories", err));
 
     // Fetch product details
     if (id) {
-      fetch(`http://localhost:3005/products/${id}`)
+      fetch(`${ENV.NEXT_PUBLIC_API_URL}/products/${id}`)
         .then(res => {
           if (!res.ok) throw new Error("Failed to fetch product");
           return res.json();
@@ -191,7 +192,7 @@ export default function EditProductPage() {
         selectedFiles.forEach(file => uploadFormData.append('files', file));
         uploadFormData.append('folder', 'product');
         
-        const uploadRes = await fetch("http://localhost:3005/upload", {
+        const uploadRes = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/upload`, {
           method: "POST",
           body: uploadFormData,
         });
@@ -219,7 +220,7 @@ export default function EditProductPage() {
              const vForm = new FormData();
              vForm.append("files", opt.imageFile);
              vForm.append("folder", "product");
-             const vRes = await fetch("http://localhost:3005/upload", { method: "POST", body: vForm });
+             const vRes = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/upload`, { method: "POST", body: vForm });
              if (vRes.ok) {
                const vData = await vRes.json();
                imageUrl = vData.urls[0];

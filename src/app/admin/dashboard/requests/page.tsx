@@ -1,6 +1,7 @@
 import { getProductRequests } from "./actions";
 import { FileText, Package, User, Clock, Info } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default async function AdminRequestsPage() {
   let requests = [];
@@ -9,6 +10,16 @@ export default async function AdminRequestsPage() {
   } catch (error) {
     // console.error(error);
   }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'REVIEWED': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'FULFILLED': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      case 'REJECTED': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -23,9 +34,9 @@ export default async function AdminRequestsPage() {
               <tr>
                 <th className="px-6 py-4 font-medium">Customer</th>
                 <th className="px-6 py-4 font-medium">Requested Product</th>
-                <th className="px-6 py-4 font-medium">Specifics</th>
-                <th className="px-6 py-4 font-medium">Date</th>
-                <th className="px-6 py-4 font-medium text-right">Status</th>
+                <th className="px-6 py-4 font-semibold">Images</th>
+                <th className="px-6 py-4 font-semibold">Status</th>
+                <th className="px-6 py-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -38,8 +49,10 @@ export default async function AdminRequestsPage() {
                   <td className="px-6 py-4">
                     <div className="font-medium text-foreground">{req.title}</div>
                     <div className="text-xs text-muted-foreground">Model: {req.model || "N/A"}</div>
+                  </td>
+                  <td className="px-6 py-4">
                     {req.images && req.images.length > 0 && (
-                      <div className="flex gap-2 mt-2">
+                      <div className="flex gap-2">
                         {req.images.map((img: string, i: number) => (
                           <div key={i} className="relative w-8 h-8 rounded border border-border overflow-hidden">
                             <Image src={img} alt="Ref" fill className="object-cover" />
@@ -49,24 +62,17 @@ export default async function AdminRequestsPage() {
                     )}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-xs space-y-1">
-                      <div><span className="font-medium text-foreground">Color:</span> {req.color || "Any"}</div>
-                      <div><span className="font-medium text-foreground">Size:</span> {req.size || "Any"}</div>
-                      <div><span className="font-medium text-foreground">Qty:</span> {req.quantity}</div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-muted-foreground">
-                    {new Date(req.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
-                      req.status === 'FULFILLED' ? 'bg-emerald-100 text-emerald-700' :
-                      req.status === 'REVIEWED' ? 'bg-blue-100 text-blue-700' :
-                      req.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
-                      'bg-amber-100 text-amber-700'
-                    }`}>
+                    <span className={`text-xs font-semibold px-2 py-1 rounded-full border ${getStatusColor(req.status)}`}>
                       {req.status}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <Link 
+                      href={`/admin/dashboard/requests/${req.id}`}
+                      className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded hover:opacity-90 transition-opacity"
+                    >
+                      View Details
+                    </Link>
                   </td>
                 </tr>
               ))}
