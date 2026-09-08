@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { loginAdmin } from "../actions";
 import { Button } from "@/components/ui/Button";
+import { ENV } from "@/lib/env";
 
 const initialState = {
   error: null as string | null,
@@ -22,24 +23,23 @@ export default function AdminLoginPage() {
         <form action={formAction} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium">Email Address</label>
-            <input 
+            <input
               name="email"
-              type="email" 
+              type="email"
               required
-              defaultValue="admin@gmail.com"
-              className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" 
-              placeholder="admin@gmail.com"
+              defaultValue={ENV.ADMIN_EMAIL}
+              className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              placeholder={ENV.ADMIN_EMAIL || "admin@example.com"}
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium">Password</label>
-            <input 
+            <input
               name="password"
-              type="password" 
+              type="password"
               required
-              defaultValue="admin123456"
-              className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2" 
-              placeholder="••••••••"
+              className="flex h-11 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+              placeholder={"••••••••"}
             />
           </div>
 

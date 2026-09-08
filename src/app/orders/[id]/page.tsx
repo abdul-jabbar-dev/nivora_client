@@ -172,7 +172,7 @@ export default function OrderDetailsPage() {
                 {order.status !== 'DELIVERED' && order.status !== 'CANCELLED' && (
                   <div className="flex gap-2 w-full sm:w-auto print:hidden">
                     {order.status === 'PENDING' && (
-                      <Button variant="destructive" className="flex-1 sm:flex-none" onClick={handleCancelOrder} disabled={isCancelling}>
+                      <Button variant="outline" className="flex-1 sm:flex-none text-red-500 border-red-500 hover:bg-red-50" onClick={handleCancelOrder} disabled={isCancelling}>
                         {isCancelling ? 'Cancelling...' : 'Cancel'}
                       </Button>
                     )}

@@ -1,11 +1,24 @@
 import { Container } from "@/components/ui/Container";
+import { ENV } from "@/lib/env";
 
 export const metadata = {
   title: "Shipping Information | NIVORA",
   description: "Learn about our shipping methods, delivery times, and rates.",
 };
 
-export default function ShippingPage() {
+export default async function ShippingPage() {
+  let siteSettings = null;
+  try {
+    const res = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/site-settings`, {
+      next: { revalidate: 60 }
+    });
+    if (res.ok) {
+      siteSettings = await res.json();
+    }
+  } catch (e) {
+    console.error("Failed to fetch site settings", e);
+  }
+
   return (
     <div className="min-h-screen pt-32 pb-20 bg-background">
       <Container>
@@ -25,11 +38,15 @@ export default function ShippingPage() {
               <li><strong>Outside Dhaka (Nationwide):</strong> 3-5 Business Days (৳130)</li>
             </ul>
 
-            <h2 className="text-2xl font-semibold text-foreground mt-8">Free Shipping</h2>
-            <p>
-              We offer free standard shipping on all orders over ৳5000. Free shipping will be automatically 
-              applied at checkout for qualifying orders.
-            </p>
+            {siteSettings?.freeShippingThreshold > 0 && (
+              <>
+                <h2 className="text-2xl font-semibold text-foreground mt-8">Free Shipping</h2>
+                <p>
+                  We offer free standard shipping on all orders over ৳{siteSettings.freeShippingThreshold}. Free shipping will be automatically 
+                  applied at checkout for qualifying orders.
+                </p>
+              </>
+            )}
 
             <h2 className="text-2xl font-semibold text-foreground mt-8">Order Tracking</h2>
             <p>

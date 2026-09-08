@@ -20,7 +20,7 @@ interface Category {
   parentId: string | null;
 }
 
-export function Navbar({ navCategories = [], allCategories = [] }: { navCategories?: Category[], allCategories?: Category[] }) {
+export function Navbar({ navCategories = [], allCategories = [], siteSettings = null }: { navCategories?: Category[], allCategories?: Category[], siteSettings?: any }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -73,9 +73,11 @@ export function Navbar({ navCategories = [], allCategories = [] }: { navCategori
           : "bg-transparent"
       )}
     >
-      <div className="bg-primary text-primary-foreground text-xs font-medium py-1.5 text-center">
-        Free shipping on orders over ৳5000  
-      </div>
+      {siteSettings?.freeShippingThreshold > 0 && (
+        <div className="bg-primary text-primary-foreground text-xs font-medium py-1.5 text-center">
+          Free shipping on orders over ৳{siteSettings.freeShippingThreshold}
+        </div>
+      )}
       
       <Container>
         <div className="flex h-16 items-center justify-between">

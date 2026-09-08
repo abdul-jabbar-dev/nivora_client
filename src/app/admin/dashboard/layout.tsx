@@ -18,6 +18,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
     { name: "Orders", href: "/admin/dashboard/orders", icon: ShoppingCart },
     { name: "Customers", href: "/admin/dashboard/customers", icon: Users },
     { name: "Requests", href: "/admin/dashboard/requests", icon: FileText },
+    { name: "Site Settings", href: "/admin/dashboard/settings", icon: Settings },
   ];
 
   return (

@@ -63,7 +63,7 @@ export default async function ProductPage({ params }: PageProps) {
   ];
 
   // Fetch real reviews
-  let reviewsData = { reviews: [], total: 0, totalPages: 0 };
+  let reviewsData: { reviews: any[]; total: number; totalPages: number } = { reviews: [], total: 0, totalPages: 0 };
   try {
     reviewsData = await getProductReviews(product.id, 1, 5);
   } catch (err) {

@@ -10,8 +10,8 @@ const API_URL = ENV.NEXT_PUBLIC_API_URL;
 async function getAuthHeaders() {
   const cookieStore = await cookies();
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    ENV.SUPABASE_URL,
+    ENV.SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {

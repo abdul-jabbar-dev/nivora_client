@@ -40,9 +40,21 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'bkash' | 'cod'>('bkash');
   const [shippingMethod, setShippingMethod] = useState<'sameday' | 'nationwide'>('nationwide');
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [siteSettings, setSiteSettings] = useState<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
+    const fetchSiteSettings = async () => {
+      try {
+        const response = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/site-settings`);
+        if (response.ok) {
+          setSiteSettings(await response.json());
+        }
+      } catch (err) {
+        console.error('Failed to fetch site settings', err);
+      }
+    };
+    fetchSiteSettings();
   }, []);
 
   useEffect(() => {
@@ -85,7 +97,10 @@ export default function CheckoutPage() {
   };
 
   const subtotal = getCartTotal();
-  const shipping = shippingMethod === 'sameday' ? 70 : 130;
+  let shipping = shippingMethod === 'sameday' ? 70 : 130;
+  if (siteSettings?.freeShippingThreshold > 0 && subtotal >= siteSettings.freeShippingThreshold) {
+    shipping = 0;
+  }
   const total = subtotal + shipping;
 
   const handleCheckout = async (e: React.FormEvent) => {
@@ -422,7 +437,7 @@ export default function CheckoutPage() {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Shipping (Steadfast)</span>
-                <span className="font-medium">${shipping.toFixed(2)}</span>
+                <span className="font-medium">{shipping === 0 ? 'Free' : `৳${shipping.toFixed(2)}`}</span>
               </div>
               </div>
 

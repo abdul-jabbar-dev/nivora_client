@@ -31,7 +31,7 @@ const FOOTER_SECTIONS = [
   },
 ];
 
-export function Footer() {
+export function Footer({ siteSettings = null }: { siteSettings?: any }) {
   return (
     <footer className="bg-background border-t border-border pt-8 md:pt-16 pb-6 md:pb-8">
       <Container>
@@ -43,20 +43,31 @@ export function Footer() {
             <p className="text-muted-foreground mb-4 md:mb-6 max-w-sm hidden sm:block">
               Better Things, Better Everyday.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Camera className="w-5 h-5" />
-                <span className="sr-only">Instagram</span>
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <Share2 className="w-5 h-5" />
-                <span className="sr-only">Twitter</span>
-              </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                <MessageCircle className="w-5 h-5" />
-                <span className="sr-only">Facebook</span>
-              </a>
-            </div>
+            {(siteSettings?.instagramUrl || siteSettings?.facebookUrl) && (
+              <div className="flex gap-4">
+                {siteSettings?.instagramUrl && (
+                  <a href={siteSettings.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                    <Camera className="w-5 h-5" />
+                    <span className="sr-only">Instagram</span>
+                  </a>
+                )}
+                {siteSettings?.facebookUrl && (
+                  <a href={siteSettings.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                    <MessageCircle className="w-5 h-5" />
+                    <span className="sr-only">Facebook</span>
+                  </a>
+                )}
+              </div>
+            )}
+            
+            {(siteSettings?.contactEmail || siteSettings?.contactPhone || siteSettings?.whatsapp || siteSettings?.address) && (
+              <div className="mt-6 text-sm text-muted-foreground space-y-2 max-w-xs">
+                {siteSettings?.address && <p>{siteSettings.address}</p>}
+                {siteSettings?.contactEmail && <p>Email: {siteSettings.contactEmail}</p>}
+                {siteSettings?.contactPhone && <p>Phone: {siteSettings.contactPhone}</p>}
+                {siteSettings?.whatsapp && <p>WhatsApp: {siteSettings.whatsapp}</p>}
+              </div>
+            )}
           </div>
           
           {FOOTER_SECTIONS.map((section) => (

@@ -10,8 +10,8 @@ const API_URL = ENV.NEXT_PUBLIC_API_URL;
 async function getAuthHeaders() {
   const cookieStore = await cookies();
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    ENV.SUPABASE_URL,
+    ENV.SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -41,7 +41,7 @@ export async function getProductWithAnalytics(id: string) {
   return response.json();
 }
 
-export async function createCategory(data: { name: string; slug: string; imageUrl?: string|null; parentId?: string|null }) {
+export async function createCategory(data: { name: string; slug: string; imageUrl?: string|null; parentId?: string|null; showNav?: boolean }) {
   const headers = await getAuthHeaders();
   const response = await fetch(`${API_URL}/products/categories`, {
     method: "POST",

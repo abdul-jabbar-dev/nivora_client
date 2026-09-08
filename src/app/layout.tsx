@@ -22,6 +22,8 @@ export default async function RootLayout({
 }>) {
   let navCategories = [];
   let allCategories = [];
+  let siteSettings = null;
+  
   try {
     const res = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/products/categories`, {
       next: { revalidate: 60 } // cache for 60s
@@ -34,14 +36,25 @@ export default async function RootLayout({
     console.error("Failed to fetch categories for nav", e);
   }
 
+  try {
+    const res = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/site-settings`, {
+      next: { revalidate: 60 } // cache for 60s
+    });
+    if (res.ok) {
+      siteSettings = await res.json();
+    }
+  } catch (e) {
+    console.error("Failed to fetch site settings", e);
+  }
+
   return (
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
         <Providers>
           <div className="flex min-h-screen flex-col">
-            <Navbar navCategories={navCategories} allCategories={allCategories} />
+            <Navbar navCategories={navCategories} allCategories={allCategories} siteSettings={siteSettings} />
             <main className="flex-1 pb-16 md:pb-0">{children}</main>
-            <Footer />
+            <Footer siteSettings={siteSettings} />
           </div>
           <BottomNav />
           <CartSidebar />

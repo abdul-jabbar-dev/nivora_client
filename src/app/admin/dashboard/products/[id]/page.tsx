@@ -63,7 +63,7 @@ export default async function AdminProductPage({ params }: PageProps) {
               <Edit className="w-4 h-4" /> Edit Product
             </Button>
           </Link>
-          <Button variant="destructive" className="gap-2">
+          <Button variant="outline" className="gap-2 text-red-500 border-red-500 hover:bg-red-50">
             <Trash2 className="w-4 h-4" /> Delete
           </Button>
         </div>
