@@ -46,10 +46,21 @@ export async function proxy(request: NextRequest) {
   }
 
   // Admin dashboard protection
+  const adminSession = request.cookies.get('admin_session')
+  const isAdminAuthenticated = adminSession?.value === 'true'
+
   if (request.nextUrl.pathname.startsWith('/admin/dashboard')) {
-    if (!user) {
+    if (!isAdminAuthenticated) {
       const url = request.nextUrl.clone()
       url.pathname = '/admin/login'
+      return NextResponse.redirect(url)
+    }
+  }
+
+  if (request.nextUrl.pathname === '/admin/login') {
+    if (isAdminAuthenticated) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/admin/dashboard'
       return NextResponse.redirect(url)
     }
   }

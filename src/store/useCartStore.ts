@@ -139,11 +139,13 @@ export const useCartStore = create<CartStore>()(
         try {
           // Push local items to backend to merge
           const localItems = get().items;
-          const syncData = localItems.map(item => ({
-            productId: item.product.id,
-            variant: item.variant?.type || null,
-            quantity: item.quantity
-          }));
+          const syncData = localItems
+            .filter(item => item && item.product && item.product.id)
+            .map(item => ({
+              productId: item.product.id,
+              variant: item.variant?.type || null,
+              quantity: item.quantity || 1
+            }));
           
           const dbCart = await fetchWithAuth('/cart/sync', { 
             method: 'POST', 
@@ -151,12 +153,14 @@ export const useCartStore = create<CartStore>()(
           });
           
           if (dbCart && dbCart.items) {
-            const mergedItems = dbCart.items.map((item: any) => ({
-              id: item.variant ? `${item.productId}-${item.variant}` : item.productId,
-              product: item.product,
-              variant: item.variant ? { type: item.variant, label: item.variant } : undefined, // simplified variant mapping
-              quantity: item.quantity
-            }));
+            const mergedItems = dbCart.items
+              .filter((item: any) => item && item.product)
+              .map((item: any) => ({
+                id: item.variant ? `${item.productId}-${item.variant}` : item.productId,
+                product: item.product,
+                variant: item.variant ? { type: item.variant, label: item.variant } : undefined, // simplified variant mapping
+                quantity: item.quantity
+              }));
             set({ items: mergedItems });
           }
         } catch (err) {

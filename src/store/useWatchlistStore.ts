@@ -73,11 +73,15 @@ export const useWatchlistStore = create<WatchlistStore>()(
         if (!useAuthStore.getState().user) return;
         try {
           // Pull from backend first
-          const dbItems = await fetchWithAuth('/watchlist');
-          const dbProductIds = new Set(dbItems.map((wi: any) => wi.productId || wi.product?.id));
+          const dbItems = (await fetchWithAuth('/watchlist')) || [];
+          const dbProductIds = new Set(
+            dbItems
+              .filter((wi: any) => wi?.product?.id || wi?.productId)
+              .map((wi: any) => wi.productId || wi.product?.id)
+          );
           
           // Push local items to backend only if they aren't already there
-          const localItems = get().items;
+          const localItems = get().items.filter(item => item && item.id);
           let addedAny = false;
           for (const item of localItems) {
             if (!dbProductIds.has(item.id)) {
@@ -89,10 +93,12 @@ export const useWatchlistStore = create<WatchlistStore>()(
           // If we added new items, pull the final merged list
           let finalDbItems = dbItems;
           if (addedAny) {
-            finalDbItems = await fetchWithAuth('/watchlist');
+            finalDbItems = (await fetchWithAuth('/watchlist')) || [];
           }
           
-          const mergedProducts = finalDbItems.map((wi: any) => wi.product);
+          const mergedProducts = (finalDbItems || [])
+            .map((wi: any) => wi.product)
+            .filter(Boolean);
           set({ items: mergedProducts });
         } catch (err) {
           console.error("Failed to sync watchlist", err);

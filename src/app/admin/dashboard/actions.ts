@@ -7,8 +7,17 @@ import { ENV } from "@/lib/env";
 
 const API_URL = ENV.NEXT_PUBLIC_API_URL;
 
-async function getAuthHeaders() {
+async function getAuthHeaders(): Promise<Record<string, string>> {
   const cookieStore = await cookies();
+  const adminSession = cookieStore.get("admin_session");
+  if (adminSession?.value === "true") {
+    const adminSecret = process.env.ADMIN_SECRET || "admin_secret_12345";
+    return {
+      "x-admin-secret": adminSecret,
+      "Authorization": `Bearer ${adminSecret}`,
+    };
+  }
+
   const supabase = createServerClient(
     ENV.SUPABASE_URL,
     ENV.SUPABASE_ANON_KEY,
@@ -22,7 +31,7 @@ async function getAuthHeaders() {
   );
   const { data: { session } } = await supabase.auth.getSession();
   return {
-    "Authorization": `Bearer ${session?.access_token}`,
+    "Authorization": `Bearer ${session?.access_token || ""}`,
   };
 }
 
@@ -252,5 +261,25 @@ export async function getDashboardStats() {
     throw new Error("Failed to fetch dashboard stats");
   }
   
+  return response.json();
+}
+
+export async function updateSiteSettings(data: any) {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${API_URL}/site-settings`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to update site settings");
+  }
+
+  revalidatePath("/admin/dashboard/settings");
   return response.json();
 }

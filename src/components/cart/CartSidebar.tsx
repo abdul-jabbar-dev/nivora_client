@@ -78,6 +78,7 @@ export function CartSidebar() {
                     src={item.product.imageUrl}
                     alt={item.product.name}
                     fill
+                    sizes="96px"
                     className="object-cover"
                   />
                 </div>

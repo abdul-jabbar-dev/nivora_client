@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/Button";
 import { toast } from "sonner";
 import { ENV } from "@/lib/env";
-import { createClient } from "@/lib/supabase/client";
+import { updateSiteSettings } from "../actions";
 
 interface SiteSettings {
   facebookUrl: string;
@@ -69,25 +69,7 @@ export default function SiteSettingsPage() {
     setIsLoading(true);
 
     try {
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-
-      const res = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/site-settings`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(settings),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Backend error response:", errorText);
-        throw new Error(errorText || "Failed to update");
-      }
-
+      await updateSiteSettings(settings);
       toast.success("Settings updated successfully");
     } catch (error: any) {
       console.error("Failed to update settings", error);

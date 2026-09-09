@@ -6,8 +6,17 @@ import { ENV } from "@/lib/env";
 
 const API_URL = ENV.NEXT_PUBLIC_API_URL;
 
-async function getAuthHeaders() {
+async function getAuthHeaders(): Promise<Record<string, string>> {
   const cookieStore = await cookies();
+  const adminSession = cookieStore.get("admin_session");
+  if (adminSession?.value === "true") {
+    const adminSecret = process.env.ADMIN_SECRET || "admin_secret_12345";
+    return {
+      "x-admin-secret": adminSecret,
+      "Authorization": `Bearer ${adminSecret}`,
+    };
+  }
+
   const supabase = createServerClient(
     ENV.SUPABASE_URL,
     ENV.SUPABASE_ANON_KEY,
@@ -21,19 +30,25 @@ async function getAuthHeaders() {
   );
   const { data: { session } } = await supabase.auth.getSession();
   return {
-    "Authorization": `Bearer ${session?.access_token}`,
+    "Authorization": `Bearer ${session?.access_token || ""}`,
   };
 }
 
 const fetchWithAdminKey = async (url: string, options: RequestInit = {}) => {
-  const headers = await getAuthHeaders();
+  const authHeaders = await getAuthHeaders();
+  const headers = new Headers(options.headers);
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
+  for (const [key, value] of Object.entries(authHeaders)) {
+    if (value) {
+      headers.set(key, value);
+    }
+  }
+
   return fetch(`${API_URL}${url}`, {
     ...options,
-    headers: {
-      ...options.headers,
-      ...headers,
-      'Content-Type': 'application/json'
-    }
+    headers,
   });
 };
 
