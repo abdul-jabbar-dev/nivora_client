@@ -25,7 +25,7 @@ const FOOTER_SECTIONS = [
     links: [
       { name: "About", href: "/about" },
       { name: "Careers", href: "/careers" },
-      { name: "Privacy", href: "/privacy" },
+      { name: "Privacy", href: "/privacy-policy" },
       { name: "Terms", href: "/terms" },
     ],
   },
