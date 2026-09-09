@@ -37,8 +37,8 @@ export default function CheckoutPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'bkash' | 'cod'>('bkash');
-  const [shippingMethod, setShippingMethod] = useState<'sameday' | 'nationwide'>('nationwide');
+  const [paymentMethod, setPaymentMethod] = useState<'bkash' | 'cod'>('cod');
+  const [shippingMethod, setShippingMethod] = useState<'sameday' | 'nationwide'>('sameday');
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [siteSettings, setSiteSettings] = useState<any>(null);
 
@@ -97,7 +97,7 @@ export default function CheckoutPage() {
   };
 
   const subtotal = getCartTotal();
-  let shipping = shippingMethod === 'sameday' ? 70 : 130;
+  let shipping = shippingMethod === 'sameday' ? 70 : 120;
   if (siteSettings?.freeShippingThreshold > 0 && subtotal >= siteSettings.freeShippingThreshold) {
     shipping = 0;
   }
@@ -275,7 +275,7 @@ export default function CheckoutPage() {
               <div>
                 <h2 className="text-2xl font-bold mb-6">Shipping Method</h2>
                 
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className={`block border rounded-lg p-4 cursor-pointer transition-colors ${shippingMethod === 'sameday' ? 'border-primary bg-primary/5 ring-1 ring-primary' : 'border-border bg-background hover:bg-muted/50'}`}>
                     <div className="flex items-start gap-3">
                       <input 
@@ -288,10 +288,10 @@ export default function CheckoutPage() {
                       />
                       <div className="flex-1">
                         <span className="font-semibold text-base flex items-center justify-between">
-                          Steadfast Same-Day Delivery
+                          Inside Dhaka
                           <span>৳70</span>
                         </span>
-                        <p className="text-sm text-muted-foreground mt-1">Inside Dhaka and Chattogram metro areas. (Order before 11:00 AM)</p>
+                        <p className="text-sm text-muted-foreground mt-1">Steadfast Same-Day Delivery (Order before 11:00 AM)</p>
                       </div>
                     </div>
                   </label>
@@ -308,10 +308,10 @@ export default function CheckoutPage() {
                       />
                       <div className="flex-1">
                         <span className="font-semibold text-base flex items-center justify-between">
-                          Steadfast Nationwide Delivery
-                          <span>৳130</span>
+                          Outside Dhaka
+                          <span>৳120</span>
                         </span>
-                        <p className="text-sm text-muted-foreground mt-1">Regular delivery taking 24 to 48 hours to all 64 districts.</p>
+                        <p className="text-sm text-muted-foreground mt-1">Steadfast Nationwide Delivery (24-48 hours)</p>
                       </div>
                     </div>
                   </label>
@@ -339,8 +339,8 @@ export default function CheckoutPage() {
                     {paymentMethod === 'bkash' && (
                       <div className="mt-4 pt-4 border-t border-border space-y-4 animate-in slide-in-from-top-2">
                         <div className="bg-pink-500/10 text-pink-600 p-3 rounded-md text-sm">
-                          <p className="font-medium mb-1">Please Send Money to:</p>
-                          <p className="text-lg font-bold tracking-wider">017XXXXXXXX</p>
+                          <p className="font-medium mb-1">bKash Personal Number:</p>
+                          <p className="text-lg font-bold tracking-wider">{siteSettings?.bkashNumber || '01733941913'}</p>
                         </div>
                         <div className="grid gap-2">
                           <label htmlFor="bkashNumber" className="text-sm font-medium">Your bKash Number</label>
