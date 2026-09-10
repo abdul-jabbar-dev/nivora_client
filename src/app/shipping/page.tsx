@@ -1,9 +1,14 @@
+import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 import { ENV } from "@/lib/env";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Shipping Information | NIVORA",
-  description: "Learn about our shipping methods, delivery times, and rates.",
+  description:
+    "Learn about NIVORA's fast nationwide delivery across Bangladesh, shipping policies, rates, and timelines.",
+  alternates: {
+    canonical: "/shipping",
+  },
 };
 
 export default async function ShippingPage() {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Search, ShoppingBag, User } from "lucide-react";
+import { Home, Compass, ShoppingBag, User } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/useCartStore";
@@ -21,7 +21,7 @@ export function BottomNav() {
 
   const navItems = [
     { icon: Home, label: "Home", href: "/" },
-    { icon: Search, label: "Shop", href: "/shop" },
+    { icon: Compass, label: "Shop", href: "/shop" },
     { 
       icon: ShoppingBag, 
       label: "Cart", 
@@ -30,6 +30,16 @@ export function BottomNav() {
     },
     { icon: User, label: user ? "Profile" : "Sign In", href: user ? "/profile" : "/login" },
   ];
+
+  if (!isMounted) return null;
+
+  if (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/checkout") ||
+    pathname.includes("/invoice")
+  ) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-background border-t border-border shadow-[0_-4px_16px_rgba(0,0,0,0.05)] pb-safe">

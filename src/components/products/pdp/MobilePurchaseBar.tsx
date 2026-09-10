@@ -30,7 +30,7 @@ export function MobilePurchaseBar({ product }: MobilePurchaseBarProps) {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/90 backdrop-blur-md border-t border-border z-40 md:hidden animate-in slide-in-from-bottom-full duration-300 pb-safe shadow-lg">
+    <div className="fixed bottom-16 left-0 right-0 p-3.5 bg-background/95 backdrop-blur-md border-t border-border z-40 md:hidden animate-in slide-in-from-bottom-2 duration-300 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
       <div className="flex items-center justify-between gap-4 max-w-lg mx-auto">
         <div className="flex flex-col">
           <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider">Total</span>

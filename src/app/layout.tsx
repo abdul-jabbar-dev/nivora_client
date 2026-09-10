@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -8,11 +8,70 @@ import { CartSidebar } from "@/components/cart/CartSidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ENV } from "@/lib/env";
 
+import { getSiteUrl } from "@/lib/siteUrl";
+
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
+const siteUrl = getSiteUrl();
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#ffffff",
+};
+
 export const metadata: Metadata = {
-  title: "NIVORA",
-  description: "Better Things, Better Everyday.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Online Shopping in Bangladesh | Electronics, Gadgets & More | NIVORA",
+    template: "%s | NIVORA",
+  },
+  description:
+    "Shop electronics, gadgets, accessories and unique products online in Bangladesh. Enjoy affordable prices, fast nationwide delivery and trusted service from NIVORA.",
+  keywords: [
+    "online shopping in Bangladesh",
+    "online shop Bangladesh",
+    "online store Bangladesh",
+    "online shopping BD",
+    "buy products online Bangladesh",
+    "electronics online Bangladesh",
+    "gadgets online Bangladesh",
+    "accessories online Bangladesh",
+    "affordable products Bangladesh",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "NIVORA",
+    title: "Online Shopping in Bangladesh | Electronics, Gadgets & More | NIVORA",
+    description:
+      "Shop electronics, gadgets, accessories and unique products online in Bangladesh. Enjoy affordable prices, fast nationwide delivery and trusted service from NIVORA.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Online Shopping in Bangladesh | Electronics, Gadgets & More | NIVORA",
+    description:
+      "Shop electronics, gadgets, accessories and unique products online in Bangladesh. Enjoy affordable prices, fast nationwide delivery and trusted service from NIVORA.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default async function RootLayout({
@@ -23,7 +82,7 @@ export default async function RootLayout({
   let navCategories = [];
   let allCategories = [];
   let siteSettings = null;
-  
+
   try {
     const res = await fetch(`${ENV.NEXT_PUBLIC_API_URL}/products/categories`, {
       next: { revalidate: 60 } // cache for 60s

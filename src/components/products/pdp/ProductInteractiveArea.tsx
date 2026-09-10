@@ -81,8 +81,8 @@ export function ProductInteractiveArea({ product }: ProductInteractiveAreaProps)
         )}
 
         <PurchaseActions product={product} />
-        <ProductInteractions product={product} />
         <TrustFeatures />
+        <ProductInteractions product={product} />
         <ProductDetails
           description={product.description}
           features={product.features}

@@ -1,8 +1,13 @@
+import { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "About Us | NIVORA",
-  description: "Learn more about NIVORA and our mission to provide better things for your everyday life.",
+  description:
+    "Learn more about NIVORA, our mission to deliver better everyday essentials across Bangladesh, and our commitment to trusted quality.",
+  alternates: {
+    canonical: "/about",
+  },
 };
 
 export default function AboutPage() {

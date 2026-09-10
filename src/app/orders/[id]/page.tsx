@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Container } from "@/components/ui/Container";
-import { Package, Truck, CheckCircle2, Clock, ChevronRight, FileText, ArrowLeft } from "lucide-react";
+import { Package, Truck, CheckCircle2, Clock, ChevronRight, FileText, ArrowLeft, Printer } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -43,7 +43,7 @@ const StatusBadge = ({ status }: { status: string }) => {
 export default function OrderDetailsPage() {
   const { id } = useParams() as { id: string };
   const router = useRouter();
-  const { addItem } = useCartStore();
+  const { addItem, openCart } = useCartStore();
 
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -97,7 +97,7 @@ export default function OrderDetailsPage() {
       }
     }
     setIsBuyingAgain(false);
-    router.push('/cart');
+    openCart();
   };
 
   const handlePrintInvoice = () => {
@@ -143,13 +143,17 @@ export default function OrderDetailsPage() {
             {/* Header */}
             <div className="bg-muted/30 px-6 sm:px-8 py-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4 print:bg-white print:border-none print:px-0 print:py-0 print:mb-6">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight print:text-4xl">Order Invoice</h2>
-                <p className="text-muted-foreground mt-1 print:text-black">Order {order.id}</p>
+                <h2 className="text-2xl font-bold tracking-tight">Order Details</h2>
+                <p className="text-muted-foreground mt-1">Order #{order.id.slice(0, 8).toUpperCase()}</p>
               </div>
-              <Button variant="outline" size="sm" className="w-full sm:w-auto print:hidden" onClick={handlePrintInvoice}>
-                <FileText className="w-4 h-4 mr-2" />
-                Print Invoice
-              </Button>
+              <div className="flex items-center gap-2 print:hidden">
+                <Link href={`/orders/${order.id}/invoice`} target="_blank">
+                  <Button variant="outline" size="sm" className="w-full sm:w-auto shadow-sm">
+                    <Printer className="w-4 h-4 mr-2" />
+                    View &amp; Print Invoice
+                  </Button>
+                </Link>
+              </div>
             </div>
 
             <div className="p-6 sm:p-8">
@@ -220,7 +224,7 @@ export default function OrderDetailsPage() {
                     <div className="flex-1 flex flex-col justify-center">
                       <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-2 sm:gap-4">
                         <div>
-                          <Link href={`/shop/${item.product?.id}`} className="font-semibold text-base sm:text-lg hover:underline underline-offset-4">
+                          <Link href={`/products/${item.product?.slug || item.product?.id}`} className="font-semibold text-base sm:text-lg hover:underline underline-offset-4">
                             {item.product?.name}
                           </Link>
                           <p className="text-sm text-muted-foreground mt-1">
@@ -231,7 +235,7 @@ export default function OrderDetailsPage() {
                           ৳{(item.price * item.quantity).toFixed(2)}
                         </div>
                       </div>
-                      {order.status === 'DELIVERED' && (
+                      {order.status === 'DELIVERED' ? (
                         <div className="mt-4 flex flex-col sm:flex-row justify-end items-end sm:items-center gap-4 print:hidden">
                           <ProductInteractions product={item.product} compact className="mt-0" />
                           <Button 
@@ -242,7 +246,13 @@ export default function OrderDetailsPage() {
                             Write a Review
                           </Button>
                         </div>
-                      )}
+                      ) : order.status !== 'CANCELLED' ? (
+                        <div className="mt-3 flex justify-end print:hidden">
+                          <span className="text-xs text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-md">
+                            Feedback & review available after delivery
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 ))}

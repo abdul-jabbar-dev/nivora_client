@@ -1,16 +1,23 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { loginAdmin } from "../actions";
 import { Button } from "@/components/ui/Button";
 import { ENV } from "@/lib/env";
 
 const initialState = {
   error: null as string | null,
+  success: false,
 };
 
 export default function AdminLoginPage() {
-  const [state, formAction] = useActionState(loginAdmin as any, initialState);
+  const [state, formAction, isPending] = useActionState(loginAdmin as any, initialState);
+
+  useEffect(() => {
+    if (state?.success) {
+      window.location.replace("/admin/dashboard");
+    }
+  }, [state]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted/30">
@@ -49,8 +56,8 @@ export default function AdminLoginPage() {
             </p>
           )}
 
-          <Button type="submit" className="w-full h-11 mt-4">
-            Sign In
+          <Button type="submit" disabled={isPending || state?.success} className="w-full h-11 mt-4">
+            {isPending || state?.success ? "Signing in..." : "Sign In"}
           </Button>
         </form>
       </div>

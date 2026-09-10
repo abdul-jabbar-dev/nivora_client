@@ -7,9 +7,7 @@ const FOOTER_SECTIONS = [
     title: "Shop",
     links: [
       { name: "Shop", href: "/shop" },
-      { name: "New Arrivals", href: "/new-arrivals" },
-      { name: "Best Sellers", href: "/best-sellers" },
-      { name: "Deals", href: "/deals" },
+      { name: "New Arrivals", href: "/shop?sort=newest" },
     ],
   },
   {
@@ -17,14 +15,12 @@ const FOOTER_SECTIONS = [
     links: [
       { name: "Contact", href: "/contact" },
       { name: "Shipping", href: "/shipping" },
-      { name: "FAQ", href: "/faq" },
     ],
   },
   {
     title: "Company",
     links: [
       { name: "About", href: "/about" },
-      { name: "Careers", href: "/careers" },
       { name: "Privacy", href: "/privacy-policy" },
       { name: "Terms", href: "/terms" },
     ],

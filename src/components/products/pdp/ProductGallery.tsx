@@ -51,7 +51,7 @@ export function ProductGallery({ images, alt, activeIndex: controlledIndex, setA
             >
               <Image
                 src={image}
-                alt={`Thumbnail ${idx + 1}`}
+                alt={`${alt || "Product"} thumbnail ${idx + 1}`}
                 fill
                 sizes="(max-width: 768px) 33vw, 20vw"
                 className="object-cover"

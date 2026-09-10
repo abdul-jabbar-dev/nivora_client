@@ -24,7 +24,7 @@ export function ShopByCategory() {
             Shop by Category
           </h2>
           <Link
-            href="/categories"
+            href="/shop"
             className="hidden md:flex items-center gap-2 text-sm font-medium hover:underline underline-offset-4"
           >
             All Categories <ArrowRight className="w-4 h-4" />
@@ -48,7 +48,7 @@ export function ShopByCategory() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Link
-                  href={`/categories/${category.slug}`}
+                  href={`/category/${category.slug}`}
                   className="group relative flex h-[250px] md:h-[400px] w-full flex-col overflow-hidden rounded-2xl bg-muted"
                 >
                   {category.imageUrl ? (
@@ -65,7 +65,7 @@ export function ShopByCategory() {
                   <div className="absolute bottom-0 left-0 right-0 p-6 text-white translate-y-4 transition-transform duration-300 group-hover:translate-y-0">
                     <h3 className="text-2xl font-bold mb-1">{category.name}</h3>
                     <p className="text-white/80 text-sm mb-4">
-                      {category.productCount} Products
+                      {category.productCount ?? 0} Products
                     </p>
                     <div className="inline-flex items-center gap-2 text-sm font-medium opacity-0 transition-opacity duration-300 group-hover:opacity-100">
                       Explore <ArrowRight className="w-4 h-4" />
@@ -79,7 +79,7 @@ export function ShopByCategory() {
         
         <div className="mt-8 text-center md:hidden">
           <Link
-            href="/categories"
+            href="/shop"
             className="inline-flex items-center gap-2 text-sm font-medium hover:underline underline-offset-4"
           >
             All Categories <ArrowRight className="w-4 h-4" />

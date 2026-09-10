@@ -14,10 +14,11 @@ export async function loginAdmin(prevState: any, formData: FormData) {
     cookieStore.set("admin_session", "true", {
       httpOnly: true,
       secure: ENV.NODE_ENV === "production",
+      sameSite: "lax",
       maxAge: 60 * 60 * 24 * 7,
       path: "/",
     });
-    redirect("/admin/dashboard");
+    return { success: true };
   }
 
   return { error: "Invalid credentials" };

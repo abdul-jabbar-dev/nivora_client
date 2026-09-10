@@ -200,19 +200,19 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30 pt-32 pb-20">
+    <div className="min-h-screen bg-muted/30 pt-24 sm:pt-32 pb-16 sm:pb-20">
       <Container>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
-          <Link href="/cart" className="hover:text-foreground transition-colors">Cart</Link>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6 sm:mb-8">
+          <Link href="/shop" className="hover:text-foreground transition-colors">Shop</Link>
           <ChevronRight className="w-4 h-4" />
           <span className="text-foreground font-medium">Checkout</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-12 items-start">
           
           {/* Left Column - Form */}
-          <div className="lg:col-span-7 xl:col-span-8 bg-background p-6 md:p-8 rounded-2xl shadow-sm border border-border order-2 lg:order-1">
-            <h2 className="text-2xl font-bold mb-6">Contact Information</h2>
+          <div className="lg:col-span-7 xl:col-span-8 bg-background p-4 sm:p-6 md:p-8 rounded-2xl shadow-sm border border-border order-2 lg:order-1">
+            <h2 className="text-xl sm:text-2xl font-bold mb-6">Contact Information</h2>
             
             <form onSubmit={handleCheckout} className="space-y-8">
               <div className="space-y-4">
@@ -221,13 +221,13 @@ export default function CheckoutPage() {
                   {isLoadingProfile ? (
                     <Skeleton className="h-12 w-full rounded-md" />
                   ) : (
-                    <input value={user?.email || ''} disabled type="email" id="email" className="flex h-12 w-full rounded-md border border-border bg-muted px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50" placeholder="you@example.com" />
+                    <input value={user?.email || ''} disabled type="email" id="email" className="flex h-12 w-full rounded-md border border-border bg-muted px-3 py-2 text-base sm:text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50" placeholder="you@example.com" />
                   )}
                 </div>
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold mb-6">Shipping Address</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-6">Shipping Address</h2>
                 {isLoadingProfile ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2"><Skeleton className="h-4 w-20" /><Skeleton className="h-12 w-full rounded-md" /></div>
@@ -242,31 +242,31 @@ export default function CheckoutPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
                       <label htmlFor="firstName" className="text-sm font-medium">First name</label>
-                      <input required value={formData.firstName} onChange={handleChange} type="text" id="firstName" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                      <input required value={formData.firstName} onChange={handleChange} type="text" id="firstName" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                     </div>
                     <div className="grid gap-2">
                       <label htmlFor="lastName" className="text-sm font-medium">Last name</label>
-                      <input required value={formData.lastName} onChange={handleChange} type="text" id="lastName" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                      <input required value={formData.lastName} onChange={handleChange} type="text" id="lastName" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                     </div>
                     <div className="grid gap-2 md:col-span-2">
                       <label htmlFor="address" className="text-sm font-medium">Address</label>
-                      <input required value={formData.address} onChange={handleChange} type="text" id="address" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                      <input required value={formData.address} onChange={handleChange} type="text" id="address" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                     </div>
                     <div className="grid gap-2">
                       <label htmlFor="landmark" className="text-sm font-medium">Landmark (Optional)</label>
-                      <input value={formData.landmark} onChange={handleChange} type="text" id="landmark" placeholder="e.g. Near the big banyan tree" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                      <input value={formData.landmark} onChange={handleChange} type="text" id="landmark" placeholder="e.g. Near the big banyan tree" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                     </div>
                     <div className="grid gap-2">
                       <label htmlFor="phoneNumber" className="text-sm font-medium">Phone Number</label>
-                      <input required value={formData.phoneNumber} onChange={handleChange} type="tel" id="phoneNumber" placeholder="01XXXXXXXXX" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                      <input required value={formData.phoneNumber} onChange={handleChange} type="tel" id="phoneNumber" placeholder="01XXXXXXXXX" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                     </div>
                     <div className="grid gap-2">
                       <label htmlFor="city" className="text-sm font-medium">City</label>
-                      <input required value={formData.city} onChange={handleChange} type="text" id="city" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                      <input required value={formData.city} onChange={handleChange} type="text" id="city" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                     </div>
                     <div className="grid gap-2">
                       <label htmlFor="zip" className="text-sm font-medium">Postal code</label>
-                      <input required value={formData.zip} onChange={handleChange} type="text" id="zip" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                      <input required value={formData.zip} onChange={handleChange} type="text" id="zip" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                     </div>
                   </div>
                 )}
@@ -344,11 +344,11 @@ export default function CheckoutPage() {
                         </div>
                         <div className="grid gap-2">
                           <label htmlFor="bkashNumber" className="text-sm font-medium">Your bKash Number</label>
-                          <input required={paymentMethod === 'bkash'} value={formData.bkashNumber} onChange={handleChange} type="text" id="bkashNumber" placeholder="01XXXXXXXXX" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                          <input required={paymentMethod === 'bkash'} value={formData.bkashNumber} onChange={handleChange} type="text" id="bkashNumber" placeholder="01XXXXXXXXX" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                         </div>
                         <div className="grid gap-2">
                           <label htmlFor="trxId" className="text-sm font-medium">Transaction ID (TrxID)</label>
-                          <input required={paymentMethod === 'bkash'} value={formData.trxId} onChange={handleChange} type="text" id="trxId" placeholder="e.g. 8NX9QA5V" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
+                          <input required={paymentMethod === 'bkash'} value={formData.trxId} onChange={handleChange} type="text" id="trxId" placeholder="e.g. 8NX9QA5V" className="flex h-12 w-full rounded-md border border-border bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" />
                         </div>
                       </div>
                     )}
@@ -382,7 +382,7 @@ export default function CheckoutPage() {
               <Button 
                 type="submit" 
                 size="lg" 
-                className="w-full h-14 text-lg mt-8"
+                className="w-full h-14 text-base sm:text-lg mt-8"
                 disabled={isProcessing}
               >
                 {isProcessing ? (
@@ -398,8 +398,8 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right Column - Order Summary */}
-          <div className="lg:col-span-5 xl:col-span-4 bg-background p-6 md:p-8 rounded-2xl shadow-sm border border-border lg:sticky lg:top-24 order-1 lg:order-2">
-            <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+          <div className="lg:col-span-5 xl:col-span-4 bg-background p-4 sm:p-6 md:p-8 rounded-2xl shadow-sm border border-border lg:sticky lg:top-24 order-1 lg:order-2">
+            <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6">Order Summary</h2>
             
             <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2">
               {items.map((item) => (

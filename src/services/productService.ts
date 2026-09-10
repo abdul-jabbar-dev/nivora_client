@@ -54,7 +54,12 @@ export async function getProducts(params: GetProductsParams): Promise<{ products
   if (params.maxPrice !== undefined) searchParams.append('maxPrice', params.maxPrice.toString());
   if (params.minRating !== undefined) searchParams.append('minRating', params.minRating.toString());
 
-  const response = await fetch(`${API_URL}/products?${searchParams.toString()}`, { next: { revalidate: 60 } });
+  const fetchOptions: RequestInit =
+    typeof window !== "undefined" || Boolean(params.q)
+      ? { cache: "no-store" }
+      : ({ next: { revalidate: 30 } } as any);
+
+  const response = await fetch(`${API_URL}/products?${searchParams.toString()}`, fetchOptions);
   if (!response.ok) throw new Error('Failed to fetch products');
   return response.json();
 }

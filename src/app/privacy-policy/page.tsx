@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 
-export const metadata = {
-  title: "Privacy Policy | Nivora",
-  description: "Read the Privacy Policy for Nivora to understand how we collect, use, and protect your information.",
+export const metadata: Metadata = {
+  title: "Privacy Policy | NIVORA",
+  description:
+    "Read the Privacy Policy for NIVORA to understand how we collect, use, and safeguard your personal information.",
+  alternates: {
+    canonical: "/privacy-policy",
+  },
 };
 
 export default function PrivacyPolicyPage() {

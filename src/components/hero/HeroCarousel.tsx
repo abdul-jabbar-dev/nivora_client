@@ -27,7 +27,7 @@ export function HeroCarousel({ billboards }: { billboards: Billboard[] }) {
   }
 
   return (
-    <div className="relative w-full h-[400px] md:h-[600px] shadow-2xl rounded-3xl overflow-hidden group">
+    <div className="relative w-full h-[280px] sm:h-[400px] md:h-[600px] shadow-2xl rounded-2xl sm:rounded-3xl overflow-hidden group">
       <AnimatePresence mode="wait">
         <motion.div
           key={currentIndex}

@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { StarRating } from "@/components/ui/StarRating";
 
 interface ProductInfoProps {
   title: string;
@@ -44,22 +44,12 @@ export function ProductInfo({
 
       {/* Reviews */}
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-1">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`w-4 h-4 ${
-                i < Math.floor(rating)
-                  ? "fill-foreground text-foreground"
-                  : "fill-muted text-muted-foreground"
-              }`}
-            />
-          ))}
-          <span className="ml-1 text-sm font-medium">{rating.toFixed(1)}</span>
+        <div className="flex items-center gap-1.5">
+          <StarRating rating={rating} size="sm" showNumber />
         </div>
         <div className="h-4 w-px bg-border" />
         <a href="#reviews" className="text-sm text-muted-foreground hover:text-foreground hover:underline transition-colors">
-          {reviewCount} Verified Reviews
+          {reviewCount} {reviewCount === 1 ? "Verified Review" : "Verified Reviews"}
         </a>
       </div>
 

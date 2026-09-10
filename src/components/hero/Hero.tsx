@@ -23,7 +23,7 @@ export async function Hero() {
             <span className="inline-block py-1 px-3 rounded-full bg-muted text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-6">
             Curated for Everyday
           </span>
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 leading-[1.1]">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold tracking-tight mb-6 leading-[1.15] sm:leading-[1.1]">
               Better Things, <br />
             <span className="text-muted-foreground">Better Everyday.</span>
           </h1>
@@ -36,9 +36,9 @@ export async function Hero() {
                 Shop Now
               </Button>
             </Link>
-            <Link href="/shop?category=electronics" className="w-full sm:w-auto">
+            <Link href="/request-product" className="w-full sm:w-auto">
               <Button size="lg" variant="outline" className="w-full text-base">
-                Explore Collection
+                Request Product
               </Button>
             </Link>
           </div>

@@ -24,7 +24,9 @@ export function NewArrivals() {
       scrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
   };
-
+  if (!isLoading && (!products || products.length === 0)) {
+    return null;
+  }
   return (
     <section className="py-24 overflow-hidden">
       <Container>
@@ -34,7 +36,7 @@ export function NewArrivals() {
               New Arrivals
             </h2>
             <Link
-              href="/new-arrivals"
+              href="/shop?sort=newest"
               className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:underline underline-offset-4"
             >
               See All <ArrowRight className="w-4 h-4" />

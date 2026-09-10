@@ -38,8 +38,8 @@ export function ProductSort() {
       >
         <option value="featured">Featured</option>
         <option value="newest">Newest Arrivals</option>
-        <option value="price_asc">Price: Low to High</option>
-        <option value="price_desc">Price: High to Low</option>
+        <option value="price-low">Price: Low to High</option>
+        <option value="price-high">Price: High to Low</option>
       </select>
     </div>
   );

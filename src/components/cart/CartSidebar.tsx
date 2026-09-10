@@ -41,11 +41,11 @@ export function CartSidebar() {
       {/* Sidebar */}
       <div 
         className={cn(
-          "fixed top-0 right-0 h-full w-full sm:w-[400px] bg-background border-l border-border z-[110] flex flex-col shadow-2xl transition-transform duration-500 ease-in-out",
+          "fixed top-0 right-0 h-full h-dvh w-full sm:w-[400px] bg-background border-l border-border z-[110] flex flex-col shadow-2xl transition-transform duration-500 ease-in-out",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
-        <div className="flex items-center justify-between p-6 border-b border-border">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-border pt-safe">
           <h2 className="text-xl font-bold flex items-center gap-2">
             <ShoppingBag className="w-5 h-5" />
             Your Cart
@@ -136,7 +136,7 @@ export function CartSidebar() {
         </div>
 
         {items.length > 0 && (
-          <div className="p-6 border-t border-border bg-muted/20">
+          <div className="p-4 sm:p-6 border-t border-border bg-muted/20 pb-safe">
             <div className="flex items-center justify-between mb-4">
               <span className="font-medium">Subtotal</span>
               <span className="text-xl font-bold">৳{getCartTotal().toFixed(2)}</span>

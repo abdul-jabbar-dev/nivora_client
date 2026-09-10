@@ -27,6 +27,8 @@ export interface Product {
   expectedArrivalDate?: string | null;
   likesCount?: number;
   dislikesCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ProductVariantOption {
@@ -53,6 +55,8 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
-  imageUrl: string;
-  productCount: number;
+  imageUrl?: string | null;
+  productCount?: number;
+  parentId?: string | null;
+  showNav?: boolean;
 }

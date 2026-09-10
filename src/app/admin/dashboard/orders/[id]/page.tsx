@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { getAdminOrderById, updateOrderStatus } from "@/services/adminOrderService";
-import { Loader2, ArrowLeft, Package, Truck, CheckCircle2, Clock } from "lucide-react";
+import { Loader2, ArrowLeft, Package, Truck, CheckCircle2, Clock, Printer } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -108,6 +108,13 @@ export default function AdminOrderDetailsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Link
+            href={`/admin/dashboard/orders/${order.id}/invoice`}
+            target="_blank"
+            className="border border-border bg-background hover:bg-muted text-sm font-medium px-3.5 py-2 rounded-lg transition-colors inline-flex items-center gap-2 shadow-sm"
+          >
+            <Printer className="w-4 h-4 text-muted-foreground" /> Print Invoice
+          </Link>
           <span className={`text-sm font-semibold px-3 py-1 rounded-full border ${getStatusColor(order.status)}`}>
             {order.status}
           </span>
@@ -163,7 +170,7 @@ export default function AdminOrderDetailsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-sm truncate hover:underline underline-offset-4">
-                      <Link href={`/shop/${item.product.id}`}>{item.product.name}</Link>
+                      <Link href={`/products/${item.product.slug || item.product.id}`}>{item.product.name}</Link>
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">Qty: {item.quantity} × ৳{item.price.toFixed(2)}</p>
                   </div>

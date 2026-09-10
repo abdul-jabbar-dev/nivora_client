@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import { Container } from "@/components/ui/Container";
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Terms of Service | NIVORA",
-  description: "Read our terms of service and conditions of use.",
+  description:
+    "Read the Terms of Service for using NIVORA and purchasing from our online store in Bangladesh.",
+  alternates: {
+    canonical: "/terms",
+  },
 };
 
 export default function TermsPage() {
