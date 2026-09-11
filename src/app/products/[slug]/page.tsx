@@ -200,7 +200,7 @@ export default async function ProductPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdGraph) }}
       />
-      <Container className="pt-24 lg:pt-32">
+      <Container className="pt-24 lg:pt-32 max-w-none w-[85%] xl:w-[65%]">
         <Breadcrumb items={breadcrumbItems} />
 
         <ProductInteractiveArea product={product} />

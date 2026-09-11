@@ -16,7 +16,9 @@ export async function getCategories(): Promise<Category[]> {
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | null> {
-  const response = await fetch(`${API_URL}/products/${slug}`, { next: { revalidate: 3600 } });
+  const response = await fetch(`${API_URL}/products/${slug}`, { 
+    next: { revalidate: 60, tags: [`product-${slug}`, 'products'] } 
+  });
   if (!response.ok) {
     if (response.status === 404) return null;
     throw new Error('Failed to fetch product');

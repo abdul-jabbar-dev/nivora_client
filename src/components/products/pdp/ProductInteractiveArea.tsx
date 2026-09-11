@@ -35,54 +35,61 @@ export function ProductInteractiveArea({ product }: ProductInteractiveAreaProps)
   };
 
   return (
-    <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-      {/* Left Column - Gallery */}
-      <div className="lg:sticky lg:top-24 self-start">
-        <ProductGallery 
-          images={defaultImages} 
-          alt={product.name} 
-          activeIndex={activeIndex}
-          setActiveIndex={(idx) => {
-            setActiveIndex(idx);
-            setOverrideImage(null);
-          }}
-          overrideImage={overrideImage}
-        />
+    <div className="mt-8 flex flex-col gap-12 lg:gap-16">
+      {/* Top Section - Gallery & Product Actions */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14 xl:gap-16 items-start">
+        {/* Left Column - Gallery (40%) */}
+        <div className="lg:col-span-2 lg:sticky lg:top-24 self-start">
+          <ProductGallery 
+            images={defaultImages} 
+            alt={product.name} 
+            activeIndex={activeIndex}
+            setActiveIndex={(idx) => {
+              setActiveIndex(idx);
+              setOverrideImage(null);
+            }}
+            overrideImage={overrideImage}
+          />
+        </div>
+
+        {/* Right Column - Product Info & Purchasing (60%) */}
+        <div className="lg:col-span-3 flex flex-col">
+          <ProductInfo
+            title={product.name}
+            brand={product.brand}
+            price={product.price}
+            originalPrice={product.originalPrice}
+            offerPrice={product.offerPrice}
+            discountExpiryDate={product.discountExpiryDate}
+            rating={product.rating}
+            reviewCount={product.reviewCount}
+            isNew={product.isNew}
+          />
+
+          {product.status === "upcoming" && product.expectedArrivalDate && (
+            <div className="mt-4 p-4 rounded-lg bg-blue-50/50 border border-blue-100 text-blue-800">
+              <h3 className="font-semibold mb-1">Coming Soon</h3>
+              <p className="text-sm">Expected Arrival: {new Date(product.expectedArrivalDate).toLocaleDateString()}</p>
+            </div>
+          )}
+
+          {product.variants && product.variants.length > 0 && (
+            <div className="mt-6">
+              <VariantSelector 
+                variants={product.variants} 
+                onVariantChange={(type, opt) => handleVariantSelect(opt.image || undefined)} 
+              />
+            </div>
+          )}
+
+          <PurchaseActions product={product} />
+          <TrustFeatures />
+          <ProductInteractions product={product} />
+        </div>
       </div>
 
-      {/* Right Column - Product Info */}
-      <div className="flex flex-col">
-        <ProductInfo
-          title={product.name}
-          brand={product.brand}
-          price={product.price}
-          originalPrice={product.originalPrice}
-          offerPrice={product.offerPrice}
-          discountExpiryDate={product.discountExpiryDate}
-          rating={product.rating}
-          reviewCount={product.reviewCount}
-          isNew={product.isNew}
-        />
-
-        {product.status === "upcoming" && product.expectedArrivalDate && (
-          <div className="mt-4 p-4 rounded-lg bg-blue-50/50 border border-blue-100 text-blue-800">
-            <h3 className="font-semibold mb-1">Coming Soon</h3>
-            <p className="text-sm">Expected Arrival: {new Date(product.expectedArrivalDate).toLocaleDateString()}</p>
-          </div>
-        )}
-
-        {product.variants && product.variants.length > 0 && (
-          <div className="mt-6">
-            <VariantSelector 
-              variants={product.variants} 
-              onVariantChange={(type, opt) => handleVariantSelect(opt.image || undefined)} 
-            />
-          </div>
-        )}
-
-        <PurchaseActions product={product} />
-        <TrustFeatures />
-        <ProductInteractions product={product} />
+      {/* Bottom Section - Full Width Product Details */}
+      <div className="w-full border-t border-border pt-10">
         <ProductDetails
           description={product.description}
           features={product.features}

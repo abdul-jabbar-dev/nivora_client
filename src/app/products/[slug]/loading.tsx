@@ -4,15 +4,15 @@ import { Skeleton } from "@/components/ui/Skeleton";
 export default function ProductLoading() {
   return (
     <div className="min-h-screen bg-background pt-32 pb-20">
-      <Container>
+      <Container className="max-w-none w-[85%] xl:w-[65%]">
         {/* Breadcrumb Skeleton */}
         <div className="mb-8">
           <Skeleton className="h-4 w-64" />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
-          {/* Left Column - Images */}
-          <div className="space-y-4 sticky top-24">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-14 xl:gap-16 items-start">
+          {/* Left Column - Images (40%) */}
+          <div className="lg:col-span-2 space-y-4 sticky top-24">
             <div className="aspect-square w-full rounded-2xl overflow-hidden bg-muted">
               <Skeleton className="w-full h-full" />
             </div>
@@ -26,8 +26,8 @@ export default function ProductLoading() {
             </div>
           </div>
 
-          {/* Right Column - Info */}
-          <div className="flex flex-col">
+          {/* Right Column - Info (60%) */}
+          <div className="lg:col-span-3 flex flex-col">
             {/* Badges */}
             <div className="flex gap-2 mb-4">
               <Skeleton className="h-6 w-16 rounded-full" />

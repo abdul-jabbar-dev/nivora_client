@@ -23,7 +23,7 @@ export function ProductGallery({ images, alt, activeIndex: controlledIndex, setA
   return (
     <div className="flex flex-col gap-4">
       {/* Main Image */}
-      <div className="relative aspect-square md:aspect-[4/5] bg-muted rounded-2xl overflow-hidden group">
+      <div className="relative aspect-square bg-muted rounded-2xl overflow-hidden group">
         <Image
           src={overrideImage || images[activeIndex]}
           alt={`${alt} - Image ${activeIndex + 1}`}
