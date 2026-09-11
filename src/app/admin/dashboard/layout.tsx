@@ -1,7 +1,7 @@
 "use client";
 
 import { Container } from "@/components/ui/Container";
-import { LogOut, LayoutDashboard, Users, ShoppingCart, Settings, Package, Tag, FileText, Presentation } from "lucide-react";
+import { LogOut, LayoutDashboard, Users, ShoppingCart, Settings, Package, Tag, FileText, Presentation, Star } from "lucide-react";
 import { logoutAdmin } from "../actions";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -18,6 +18,7 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
     { name: "Orders", href: "/admin/dashboard/orders", icon: ShoppingCart },
     { name: "Customers", href: "/admin/dashboard/customers", icon: Users },
     { name: "Requests", href: "/admin/dashboard/requests", icon: FileText },
+    { name: "Reviews", href: "/admin/dashboard/reviews", icon: Star },
     { name: "Site Settings", href: "/admin/dashboard/settings", icon: Settings },
   ];
 
@@ -43,7 +44,10 @@ export default function AdminDashboardLayout({ children }: { children: React.Rea
             <nav className="flex flex-row md:flex-col gap-1.5 overflow-x-auto no-scrollbar pb-1 md:pb-0 -mx-1 px-1">
               {NAV_LINKS.map((link) => {
                 const Icon = link.icon;
-                const isActive = pathname === link.href;
+                const isActive =
+                  link.href === "/admin/dashboard"
+                    ? pathname === "/admin/dashboard"
+                    : pathname.startsWith(link.href);
                 return (
                   <Link
                     key={link.name}

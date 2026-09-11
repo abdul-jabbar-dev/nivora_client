@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getAdminOrderById, updateOrderStatus } from "@/services/adminOrderService";
-import { Loader2, ArrowLeft, Package, Truck, CheckCircle2, Clock, Printer } from "lucide-react";
+import { getAdminOrderById, updateOrderStatus, deleteAdminOrder } from "@/services/adminOrderService";
+import { Loader2, ArrowLeft, Package, Truck, CheckCircle2, Clock, Printer, Trash2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 const StatusIcon = ({ status }: { status: string }) => {
   switch (status?.toLowerCase()) {
@@ -29,8 +29,10 @@ const getStatusColor = (status: string) => {
 
 export default function AdminOrderDetailsPage() {
   const { id } = useParams() as { id: string };
+  const router = useRouter();
   const [order, setOrder] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Status update state
   const [isUpdatingStatus, setIsUpdatingStatus] = useState(false);
@@ -41,6 +43,19 @@ export default function AdminOrderDetailsPage() {
   useEffect(() => {
     fetchOrder();
   }, [id]);
+
+  const handleDeleteOrder = async () => {
+    if (!order) return;
+    if (!confirm(`Are you sure you want to delete order ${order.id.slice(0, 8).toUpperCase()}? This action cannot be undone.`)) return;
+    try {
+      setIsDeleting(true);
+      await deleteAdminOrder(order.id);
+      router.push("/admin/dashboard/orders");
+    } catch (err: any) {
+      alert(err.message || "Failed to delete order");
+      setIsDeleting(false);
+    }
+  };
 
   const fetchOrder = async () => {
     try {
@@ -115,6 +130,13 @@ export default function AdminOrderDetailsPage() {
           >
             <Printer className="w-4 h-4 text-muted-foreground" /> Print Invoice
           </Link>
+          <button
+            onClick={handleDeleteOrder}
+            disabled={isDeleting}
+            className="border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50 text-sm font-medium px-3.5 py-2 rounded-lg transition-colors inline-flex items-center gap-2 shadow-sm"
+          >
+            <Trash2 className="w-4 h-4" /> {isDeleting ? "Deleting..." : "Delete Order"}
+          </button>
           <span className={`text-sm font-semibold px-3 py-1 rounded-full border ${getStatusColor(order.status)}`}>
             {order.status}
           </span>

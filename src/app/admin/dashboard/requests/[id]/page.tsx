@@ -1,20 +1,23 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getProductRequestById, updateProductRequestStatus } from "../actions";
-import { Loader2, ArrowLeft, Image as ImageIcon, MapPin, Calendar, CheckCircle, Clock, XCircle, Info, Phone } from "lucide-react";
+import { getProductRequestById, updateProductRequestStatus, deleteProductRequest } from "../actions";
+import { Loader2, ArrowLeft, Image as ImageIcon, MapPin, Calendar, CheckCircle, Clock, XCircle, Info, Phone, Trash2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { use } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 
 export default function ProductRequestDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const { id } = resolvedParams;
+  const router = useRouter();
   
   const [request, setRequest] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchRequest();
@@ -41,6 +44,18 @@ export default function ProductRequestDetailsPage({ params }: { params: Promise<
       console.error("Failed to update status", err);
     } finally {
       setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteRequest = async () => {
+    if (!confirm(`Are you sure you want to delete this product request for "${request?.title || 'this item'}"? This action cannot be undone.`)) return;
+    try {
+      setIsDeleting(true);
+      await deleteProductRequest(id);
+      router.push("/admin/dashboard/requests");
+    } catch (err: any) {
+      alert(err.message || "Failed to delete product request");
+      setIsDeleting(false);
     }
   };
 
@@ -90,6 +105,16 @@ export default function ProductRequestDetailsPage({ params }: { params: Promise<
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleDeleteRequest}
+            disabled={isDeleting}
+            className="border-red-200 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 text-sm font-medium gap-1.5"
+          >
+            {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+            {isDeleting ? "Deleting..." : "Delete Request"}
+          </Button>
           <span className={`px-4 py-1.5 rounded-full text-sm font-bold border ${getStatusColor(request.status)}`}>
             {request.status}
           </span>

@@ -73,3 +73,17 @@ export async function updateProductRequestStatus(id: string, status: string) {
   revalidatePath(`/admin/dashboard/requests/${id}`);
   return response.json();
 }
+
+export async function deleteProductRequest(id: string) {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${API_URL}/product-requests/${id}`, {
+    method: "DELETE",
+    headers: { ...headers },
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to delete product request");
+  }
+  revalidatePath("/admin/dashboard/requests");
+  return response.json();
+}

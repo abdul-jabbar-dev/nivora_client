@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useParams, useRouter } from "next/navigation";
-import { updateProduct } from "../../../actions";
+import Link from "next/link";
+import { updateProduct, deleteProduct } from "../../../actions";
 import { Button } from "@/components/ui/Button";
 import { ENV } from "@/lib/env";
+import { Trash2, ArrowLeft } from "lucide-react";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 import "react-quill-new/dist/quill.snow.css";
@@ -21,6 +23,7 @@ export default function EditProductPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -242,15 +245,15 @@ export default function EditProductPage() {
         name,
         slug,
         description,
-        price: parseFloat(price),
+        price: parseFloat(price) || 0,
         offerPrice: offerPrice ? parseFloat(offerPrice) : null,
         visibleStatus,
         status,
         sourceInfo: (sourceName || sourceNumber || sourceAddress) ? { name: sourceName, number: sourceNumber, address: sourceAddress } : null,
         imageUrl: mainImageUrl,
         images: imageUrls,
-        categoryId,
-        stock: parseInt(stock, 10),
+        categoryId: categoryId || null,
+        stock: parseInt(stock, 10) || 0,
         variants: formattedVariations.length > 0 ? formattedVariations : null,
         specifications: formattedSpecifications.length > 0 ? formattedSpecifications : null,
       };
@@ -270,6 +273,19 @@ export default function EditProductPage() {
     }
   }
 
+  const handleDelete = async () => {
+    if (!id) return;
+    if (!confirm("Are you sure you want to delete this product? This action cannot be undone.")) return;
+    setIsDeleting(true);
+    try {
+      await deleteProduct(id as string);
+      router.push("/admin/dashboard/products");
+    } catch (err: any) {
+      alert(err.message || "Failed to delete product");
+      setIsDeleting(false);
+    }
+  };
+
   const renderCategoryOptions = (parentId: string | null, level = 0): React.ReactNode[] => {
     const children = categories.filter(c => c.parentId === parentId);
     return children.flatMap(child => [
@@ -287,7 +303,21 @@ export default function EditProductPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Edit Product</h1>
+        <div className="flex items-center gap-3">
+          <Link href="/admin/dashboard/products" className="p-2 hover:bg-muted rounded-full transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <h1 className="text-2xl font-bold tracking-tight">Edit Product</h1>
+        </div>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={handleDelete}
+          disabled={isDeleting}
+          className="gap-2 text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+        >
+          <Trash2 className="w-4 h-4" /> {isDeleting ? "Deleting..." : "Delete Product"}
+        </Button>
       </div>
 
       <div className="bg-background rounded-2xl p-6 shadow-sm border border-border">

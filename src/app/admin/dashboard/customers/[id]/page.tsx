@@ -136,7 +136,7 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
-                <h3 className="text-2xl font-bold tracking-tight">{customer.orders.length}</h3>
+                <h3 className="text-2xl font-bold tracking-tight">{customer.orders?.length || 0}</h3>
               </div>
             </div>
             <div className="bg-background rounded-2xl border border-border shadow-sm p-6 flex items-center gap-4">
@@ -145,7 +145,7 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Lifetime Spent</p>
-                <h3 className="text-2xl font-bold tracking-tight">৳{customer.totalSpent.toFixed(2)}</h3>
+                <h3 className="text-2xl font-bold tracking-tight">৳{(customer.totalSpent || 0).toFixed(2)}</h3>
               </div>
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
               </h3>
             </div>
             
-            {customer.orders.length === 0 ? (
+            {(!customer.orders || customer.orders.length === 0) ? (
               <div className="p-8 text-center text-muted-foreground">
                 This customer hasn't placed any orders yet.
               </div>
@@ -186,7 +186,7 @@ export default function CustomerDetailsPage({ params }: { params: Promise<{ id: 
                           {new Date(order.createdAt).toLocaleDateString()}
                         </td>
                         <td className="px-6 py-4">
-                          {order.items.length} items
+                          {order.items?.length || 0} items
                         </td>
                         <td className="px-6 py-4 font-medium">
                           ৳{order.total.toFixed(2)}

@@ -44,10 +44,10 @@ export function UpcomingProducts() {
           </div>
           
           <div className="hidden md:flex gap-2">
-            <Button variant="outline" size="icon" onClick={() => scroll("left")} className="rounded-full bg-background">
+            <Button variant="outline" size="icon" onClick={() => scroll("left")} className="rounded-full bg-background" aria-label="Scroll left">
               <ChevronLeft className="w-5 h-5" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => scroll("right")} className="rounded-full bg-background">
+            <Button variant="outline" size="icon" onClick={() => scroll("right")} className="rounded-full bg-background" aria-label="Scroll right">
               <ChevronRight className="w-5 h-5" />
             </Button>
           </div>

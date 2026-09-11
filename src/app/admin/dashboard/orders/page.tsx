@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { getAllAdminOrders } from "@/services/adminOrderService";
-import { Loader2 } from "lucide-react";
+import { getAllAdminOrders, deleteAdminOrder } from "@/services/adminOrderService";
+import { Loader2, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -23,6 +24,20 @@ export default function AdminOrdersPage() {
       console.error("Failed to fetch orders", err);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleDeleteOrder = async (id: string) => {
+    if (!confirm(`Are you sure you want to delete order ${id.slice(0, 8).toUpperCase()}? This action cannot be undone.`)) return;
+    setDeletingId(id);
+    try {
+      await deleteAdminOrder(id);
+      setOrders((prev) => prev.filter((o) => o.id !== id));
+      await fetchOrders();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete order");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -112,18 +127,29 @@ export default function AdminOrdersPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
                         <Link 
                           href={`/admin/dashboard/orders/${order.id}`}
-                          className="text-xs bg-primary text-primary-foreground px-3 py-1.5 rounded hover:opacity-90 transition-opacity mr-2"
+                          className="text-xs bg-primary text-primary-foreground px-2.5 py-1.5 rounded hover:opacity-90 transition-opacity"
                         >
-                          View Details
+                          Details
                         </Link>
                         <Link 
                           href={`/orders/${order.id}`}
-                          className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded hover:opacity-90 transition-opacity"
+                          target="_blank"
+                          className="text-xs bg-muted text-muted-foreground px-2.5 py-1.5 rounded hover:opacity-90 transition-opacity hidden sm:inline-block"
                         >
-                          View as Customer
+                          Customer View
                         </Link>
+                        <button
+                          onClick={() => handleDeleteOrder(order.id)}
+                          disabled={deletingId === order.id}
+                          className="text-xs text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 disabled:opacity-50 p-1.5 rounded transition-colors"
+                          title="Delete Order"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                     

@@ -29,8 +29,7 @@ export function SpecialOffers() {
     return null;
   }
 
-  if (isLoading && products?.length === 0) return null;
-  if (!isLoading && products && products?.length > 0) return (
+  return (
     <section className="py-24 bg-red-50/50 overflow-hidden">
       <Container>
         <div className="flex items-end justify-between mb-12">
@@ -45,10 +44,10 @@ export function SpecialOffers() {
           </div>
 
           <div className="hidden md:flex gap-2">
-            <Button variant="outline" size="icon" onClick={() => scroll("left")} className="rounded-full bg-background">
+            <Button variant="outline" size="icon" onClick={() => scroll("left")} className="rounded-full bg-background" aria-label="Scroll left">
               <ChevronLeft className="w-5 h-5" />
             </Button>
-            <Button variant="outline" size="icon" onClick={() => scroll("right")} className="rounded-full bg-background">
+            <Button variant="outline" size="icon" onClick={() => scroll("right")} className="rounded-full bg-background" aria-label="Scroll right">
               <ChevronRight className="w-5 h-5" />
             </Button>
           </div>

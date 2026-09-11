@@ -52,9 +52,11 @@ export function CartSidebar() {
           </h2>
           <button 
             onClick={closeCart}
+            aria-label="Close cart"
             className="p-2 -mr-2 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
           >
             <X className="w-5 h-5" />
+            <span className="sr-only">Close cart</span>
           </button>
         </div>
 
@@ -101,9 +103,11 @@ export function CartSidebar() {
                     </div>
                     <button 
                       onClick={() => removeItem(item.id)}
+                      aria-label={`Remove ${item.product.name} from cart`}
                       className="text-muted-foreground hover:text-red-500 transition-colors p-1"
                     >
                       <Trash2 className="w-4 h-4" />
+                      <span className="sr-only">Remove item</span>
                     </button>
                   </div>
                   
@@ -112,9 +116,11 @@ export function CartSidebar() {
                       <button 
                         onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))}
                         disabled={item.quantity <= 1}
+                        aria-label="Decrease quantity"
                         className="flex-1 h-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-50"
                       >
                         <Minus className="w-3 h-3" />
+                        <span className="sr-only">Decrease quantity</span>
                       </button>
                       <span className="flex-1 h-full flex items-center justify-center text-sm font-medium border-x border-border">
                         {item.quantity}
@@ -122,9 +128,11 @@ export function CartSidebar() {
                       <button 
                         onClick={() => updateQuantity(item.id, Math.min((item.variant ? (item.variant as any).inventory || (item.variant as any).stock || 0 : item.product.stock || 0), item.quantity + 1))}
                         disabled={item.quantity >= (item.variant ? (item.variant as any).inventory || (item.variant as any).stock || 0 : item.product.stock || 0)}
+                        aria-label="Increase quantity"
                         className="flex-1 h-full flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-50"
                       >
                         <Plus className="w-3 h-3" />
+                        <span className="sr-only">Increase quantity</span>
                       </button>
                     </div>
                     <p className="font-semibold">৳{((item.product.offerPrice ?? item.product.price) * item.quantity).toFixed(2)}</p>

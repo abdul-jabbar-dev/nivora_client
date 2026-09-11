@@ -2,7 +2,9 @@
 
 import { useState, useEffect, Suspense } from "react";
 import dynamic from "next/dynamic";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { createProduct } from "../../actions";
 import { Button } from "@/components/ui/Button";
 import { ENV } from "@/lib/env";
@@ -16,6 +18,7 @@ interface Category {
 }
 
 function ProductsAdminPageContent() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const isUpcoming = searchParams.get("upcoming") === "true";
 
@@ -202,6 +205,9 @@ function ProductsAdminPageContent() {
 
       await createProduct(data);
       setSuccess(true);
+      setTimeout(() => {
+        router.push("/admin/dashboard/products");
+      }, 1500);
       formElement.reset();
       setDescription("");
       setVariations([]);
@@ -234,7 +240,12 @@ function ProductsAdminPageContent() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">Manage Products</h1>
+        <div className="flex items-center gap-3">
+          <Link href="/admin/dashboard/products" className="p-2 hover:bg-muted rounded-full transition-colors">
+            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
+          </Link>
+          <h1 className="text-2xl font-bold tracking-tight">Create Product</h1>
+        </div>
       </div>
 
       <div className="bg-background rounded-2xl p-6 shadow-sm border border-border">

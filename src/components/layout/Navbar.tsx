@@ -237,8 +237,21 @@ export function Navbar({
             >
               <Menu className="w-5 h-5" />
             </button>
-            <Link href="/" className="flex items-center text-foreground hover:opacity-90 transition-opacity">
-              <svg width="140" height="36" viewBox="0 0 140 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <Link 
+              href="/" 
+              className="flex items-center text-foreground hover:opacity-90 transition-opacity"
+              aria-label="NIVORA Home"
+            >
+              <svg 
+                width="140" 
+                height="36" 
+                viewBox="0 0 140 36" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+                role="img"
+                aria-label="NIVORA Logo"
+              >
+                <title>NIVORA</title>
                 <rect x="1.5" y="1.5" width="132" height="33" stroke="currentColor" strokeWidth="2" />
                 <text
                   x="50%"
@@ -252,6 +265,7 @@ export function Navbar({
                   NIVORΛ
                 </text>
               </svg>
+              <span className="sr-only">NIVORA - Home</span>
             </Link>
 
             <nav className="hidden lg:flex items-center gap-6">
@@ -466,8 +480,10 @@ export function Navbar({
                           }}
                           className="p-1 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition-colors"
                           title="Clear text"
+                          aria-label="Clear search query"
                         >
                           <X className="w-3.5 h-3.5" />
+                          <span className="sr-only">Clear search query</span>
                         </button>
                       )}
                       <button
@@ -475,8 +491,10 @@ export function Navbar({
                         onClick={closeDesktopSearch}
                         className="p-1 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition-colors"
                         title="Close search (Esc)"
+                        aria-label="Close search"
                       >
                         <X className="w-4 h-4" />
+                        <span className="sr-only">Close search</span>
                       </button>
                     </div>
                   </form>
@@ -742,8 +760,10 @@ export function Navbar({
                   type="button"
                   onClick={() => setSearchQuery("")}
                   className="absolute right-2.5 p-1 text-muted-foreground"
+                  aria-label="Clear search"
                 >
                   <X className="w-3.5 h-3.5" />
+                  <span className="sr-only">Clear search</span>
                 </button>
               )}
             </div>
@@ -812,9 +832,14 @@ export function Navbar({
           >
             <div className="p-4 border-b border-border flex items-center justify-between">
               <span className="font-bold tracking-wider uppercase text-xs text-muted-foreground">Menu</span>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-foreground/80 hover:text-foreground">
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)} 
+                className="p-2 text-foreground/80 hover:text-foreground"
+                aria-label="Close navigation menu"
+              >
                 <X className="w-5 h-5" />
-                </button>
+                <span className="sr-only">Close navigation menu</span>
+              </button>
               </div>
 
               <div className="flex-1 overflow-y-auto py-4">

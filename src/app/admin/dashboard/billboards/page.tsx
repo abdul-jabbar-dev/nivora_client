@@ -21,6 +21,7 @@ export default function BillboardsAdminPage() {
   
   const [billboards, setBillboards] = useState<Billboard[]>([]);
   const [loadingBillboards, setLoadingBillboards] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchBillboards = async () => {
     try {
@@ -111,11 +112,16 @@ export default function BillboardsAdminPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this billboard?")) return;
+    setDeletingId(id);
     try {
       await deleteBillboard(id);
-      fetchBillboards();
-    } catch (e) {
+      setBillboards(prev => prev.filter(b => b.id !== id));
+      await fetchBillboards();
+    } catch (e: any) {
+      alert(e.message || "Failed to delete billboard");
       console.error(e);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -222,9 +228,10 @@ export default function BillboardsAdminPage() {
                     </label>
                     <button 
                       onClick={() => handleDelete(billboard.id)}
-                      className="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-md transition-colors"
+                      disabled={deletingId === billboard.id}
+                      className="text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 disabled:opacity-50 px-3 py-1.5 rounded-md transition-colors"
                     >
-                      Delete
+                      {deletingId === billboard.id ? "Deleting..." : "Delete"}
                     </button>
                   </div>
                 </li>

@@ -33,7 +33,7 @@ export function Footer({ siteSettings = null }: { siteSettings?: any }) {
       <Container>
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-x-4 gap-y-8 md:gap-12 mb-8 md:mb-16">
           <div className="col-span-2 lg:col-span-2">
-            <Link href="/" className="text-2xl font-bold tracking-tight mb-2 md:mb-4 inline-block">
+            <Link href="/" aria-label="NIVORA Home" className="text-2xl font-bold tracking-tight mb-2 md:mb-4 inline-block">
               NIVORA
             </Link>
             <p className="text-muted-foreground mb-4 md:mb-6 max-w-sm hidden sm:block">
@@ -42,13 +42,13 @@ export function Footer({ siteSettings = null }: { siteSettings?: any }) {
             {(siteSettings?.instagramUrl || siteSettings?.facebookUrl) && (
               <div className="flex gap-4">
                 {siteSettings?.instagramUrl && (
-                  <a href={siteSettings.instagramUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <a href={siteSettings.instagramUrl} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-muted-foreground hover:text-foreground transition-colors">
                     <Camera className="w-5 h-5" />
                     <span className="sr-only">Instagram</span>
                   </a>
                 )}
                 {siteSettings?.facebookUrl && (
-                  <a href={siteSettings.facebookUrl} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+                  <a href={siteSettings.facebookUrl} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-muted-foreground hover:text-foreground transition-colors">
                     <MessageCircle className="w-5 h-5" />
                     <span className="sr-only">Facebook</span>
                   </a>

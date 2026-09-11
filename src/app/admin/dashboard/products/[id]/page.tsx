@@ -2,8 +2,9 @@ import { getProductWithAnalytics } from "../../actions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Package, DollarSign, TrendingUp, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Package, DollarSign, TrendingUp, Edit } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { DeleteProductButton } from "./DeleteProductButton";
 
 interface PageProps {
   params: Promise<{
@@ -63,9 +64,7 @@ export default async function AdminProductPage({ params }: PageProps) {
               <Edit className="w-4 h-4" /> Edit Product
             </Button>
           </Link>
-          <Button variant="outline" className="gap-2 text-red-500 border-red-500 hover:bg-red-50">
-            <Trash2 className="w-4 h-4" /> Delete
-          </Button>
+          <DeleteProductButton productId={product.id} />
         </div>
       </div>
 

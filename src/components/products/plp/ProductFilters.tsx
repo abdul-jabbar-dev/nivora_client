@@ -286,8 +286,13 @@ export function ProductFilters({
           <div className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-background p-6 shadow-xl animate-in slide-in-from-left">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-lg font-bold">Filters</h2>
-              <button onClick={() => setIsOpen(false)} className="p-2 -mr-2 text-muted-foreground hover:text-foreground">
+              <button 
+                onClick={() => setIsOpen(false)} 
+                aria-label="Close filters"
+                className="p-2 -mr-2 text-muted-foreground hover:text-foreground"
+              >
                 <X className="w-5 h-5" />
+                <span className="sr-only">Close filters</span>
               </button>
             </div>
             <div className="flex-1">

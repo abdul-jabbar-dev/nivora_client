@@ -14,9 +14,9 @@ export function ShopByCategory() {
     queryFn: getCategories,
   });
 
-  if (isLoading) return null;
-  if (!isLoading && categories && categories?.length > 0) return (
+  if (!isLoading && (!categories || categories.length === 0)) return null;
 
+  return (
     <section className="py-24 bg-muted/30">
       <Container>
         <div className="flex items-end justify-between mb-12">

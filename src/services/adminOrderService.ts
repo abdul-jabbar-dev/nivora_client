@@ -76,3 +76,14 @@ export async function updateOrderStatus(orderId: string, status: string, note?: 
   if (!response.ok) throw new Error('Failed to update order status');
   return response.json();
 }
+
+export async function deleteAdminOrder(orderId: string) {
+  const response = await fetchWithAdminKey(`/orders/admin/${orderId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to delete order');
+  }
+  return response.json();
+}

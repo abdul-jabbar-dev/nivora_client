@@ -219,9 +219,53 @@ export async function updateCategoryNav(id: string, showNav: boolean) {
   return response.json();
 }
 
-export async function getAllCustomers(page = 1, limit = 20) {
+export async function updateCategory(id: string, data: { name?: string; slug?: string; imageUrl?: string | null; parentId?: string | null; showNav?: boolean }) {
   const headers = await getAuthHeaders();
-  const response = await fetch(`${API_URL}/users/admin/all?page=${page}&limit=${limit}`, {
+  const response = await fetch(`${API_URL}/products/categories/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to update category");
+  }
+
+  revalidatePath("/admin/dashboard/categories");
+  return response.json();
+}
+
+export async function deleteCategory(id: string) {
+  const headers = await getAuthHeaders();
+  const response = await fetch(`${API_URL}/products/categories/${id}`, {
+    method: "DELETE",
+    headers: {
+      ...headers,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to delete category");
+  }
+
+  revalidatePath("/admin/dashboard/categories");
+  return response.json();
+}
+
+export async function getAllCustomers(page = 1, limit = 20, role?: string) {
+  const headers = await getAuthHeaders();
+  const url = new URL(`${API_URL}/users/admin/all`);
+  url.searchParams.set("page", page.toString());
+  url.searchParams.set("limit", limit.toString());
+  if (role && role !== "ALL") {
+    url.searchParams.set("role", role);
+  }
+  const response = await fetch(url.toString(), {
     headers: { ...headers },
     cache: "no-store",
   });

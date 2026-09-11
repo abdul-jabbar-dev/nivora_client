@@ -11,8 +11,8 @@ export function TrendingProducts() {
     queryKey: ["trendingProducts"],
     queryFn: getTrendingProducts,
   });
-  if (isLoading) return null;
-  if (!isLoading && products && products?.length > 0) return (
+  if (!isLoading && (!products || products.length === 0)) return null;
+  return (
     <section className="py-24">
       <Container>
         <div className="flex items-end justify-between mb-12">
